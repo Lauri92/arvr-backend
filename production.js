@@ -15,7 +15,8 @@ module.exports = (app, port) => {
       res.redirect(301, `https://${req.headers.host}${proxypath}${req.url}`);
     }
   });
-  app.listen(port, () => console.log(`app listen on port ${port}`));
+  //app.listen(port, () => console.log(`app listen on port ${port}`));
+  app.listen(3000);
 /*
   // No ssl for heroku
   const PORT = process.env.PORT;
