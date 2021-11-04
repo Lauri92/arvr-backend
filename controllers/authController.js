@@ -7,7 +7,7 @@ const get_message = async (req, res, next) => {
 
 const post_user = async (req, res, next) => {
   console.log(req);
-  res.status.send({message: "post_user"})
+  res.status(200).send({message: "post_user"})
 }
 
 
