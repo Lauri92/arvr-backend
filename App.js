@@ -24,9 +24,6 @@ if (process.env.NODE_ENV === 'production') {
   require('./localhost')(app, process.env.HTTPS_PORT, process.env.HTTP_PORT);
   console.log("Started on localhost");
 }
-app.get('/', (req, res) => {
-  res.send('Hello Secure World!');
-});
 
 
 

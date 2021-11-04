@@ -7,6 +7,12 @@ const authController = require('../controllers/authController');
 
 router.route('/register').
     get(authController.get_message).
-    post(authController.post_user);
+    post([
+      body('username', 'minimum length 3 characters and not a naughty word!').
+          isLength({min: 3}),
+      body('password',
+          'minimum length 8 characters, at least one capital letter').
+          matches('(?=.*[A-Z]).{8,}'),
+    ], authController.post_user);
 
 module.exports = router;
