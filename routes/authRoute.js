@@ -5,8 +5,7 @@ const router = express.Router();
 const {body} = require('express-validator');
 const authController = require('../controllers/authController');
 
-router.get('/register',
-    authController.user_create_post,
-);
+router.get('/register', authController.get_message).
+    post('/register', authController.post_user);
 
 module.exports = router;

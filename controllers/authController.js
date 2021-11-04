@@ -1,10 +1,17 @@
 'use strict';
 
-const user_create_post = async (req, res, next) => {
+const get_message = async (req, res, next) => {
   console.log(req);
-  res.status(200).send({message: "get_user"});
+  res.status(200).send({message: "get_message"});
 };
 
+const post_user = async (req, res, next) => {
+  console.log(req);
+  res.status.send({message: "post_user"})
+}
+
+
 module.exports = {
-  user_create_post,
+  get_message,
+  post_user,
 }
