@@ -19,6 +19,7 @@ module.exports = (app, port) => {
    */
   //app.listen(port, () => console.log(`app listen on port ${port}`));
   app.listen(3000);
+  console.log("App started on remote server");
 /*
   // No ssl for heroku
   const PORT = process.env.PORT;
