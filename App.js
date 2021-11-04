@@ -12,8 +12,22 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static('.')); // for index.html
 
 //require('./localhost')(app, process.env.HTTPS_PORT, process.env.HTTP_PORT);
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`listening on ${PORT}`));
+//const PORT = process.env.PORT || 5000;
+//app.listen(PORT, () => console.log(`listening on ${PORT}`));
 //console.log('App started on localhost.');
+
+
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+if (process.env.NODE_ENV === 'production') {
+  require('./production')(app, process.env.PORT);
+} else {
+  require('./localhost')(app, process.env.HTTPS_PORT, process.env.HTTP_PORT);
+  console.log("Started on localhost");
+}
+app.get('/', (req, res) => {
+  res.send('Hello Secure World!');
+});
+
+
 
 app.use('/auth', authRoute);
