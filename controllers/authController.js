@@ -1,25 +1,38 @@
 'use strict';
 const {validationResult} = require('express-validator');
+const bcrypt = require('bcryptjs');
+const userModel = require('../Models/userModel');
 
 const get_message = async (req, res, next) => {
   console.log(req);
   res.status(200).send({message: 'get_message'});
 };
 
-const post_user = async (req, res, next) => {
-
+const create_user = async (req, res, next) => {
   // Extract the validation errors from a request.
   const errors = validationResult(req);
 
   try {
     if (!errors.isEmpty()) {
+      console.log('Errors!!', errors);
       // Errors in validation
-      console.log('user create error', errors);
-      res.status(200).send({message: 'Errors in validation!'});
+      res.status(200).json({message: 'Errors in validation!'});
     } else {
-      // No errors
-      console.log('user create no errors!');
-      res.status(200).send({message: 'No errors in validation!'});
+      console.log('No errors!');
+      // No errors, salt and hash pw
+      const salt = bcrypt.genSaltSync(10);
+      req.body.password = bcrypt.hashSync(req.body.password, salt);
+      const user = {
+        username: req.body.username,
+        password: req.body.password,
+      };
+
+      if (await userModel.insertUser(user)) {
+        res.status(200).
+            json({message: 'Registration successful and account created'});
+      } else {
+        res.status(400).json({message: 'Register error!'});
+      }
     }
   } catch (e) {
     console.error('e:', e);
@@ -28,5 +41,5 @@ const post_user = async (req, res, next) => {
 
 module.exports = {
   get_message,
-  post_user,
+  create_user,
 };

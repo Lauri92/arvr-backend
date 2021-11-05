@@ -13,6 +13,6 @@ router.route('/register').
       body('password',
           'minimum length 8 characters, at least one capital letter').
           matches('(?=.*[A-Z]).{8,}'),
-    ], authController.post_user);
+    ], authController.create_user);
 
 module.exports = router;

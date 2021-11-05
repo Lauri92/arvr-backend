@@ -9,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.use(express.static('.')); // for index.html
 
 //require('./localhost')(app, process.env.HTTPS_PORT, process.env.HTTP_PORT);
@@ -16,15 +17,15 @@ app.use(express.static('.')); // for index.html
 //app.listen(PORT, () => console.log(`listening on ${PORT}`));
 //console.log('App started on localhost.');
 
-
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 if (process.env.NODE_ENV === 'production') {
   require('./production')(app, process.env.PORT);
 } else {
-  require('./localhost')(app, process.env.HTTPS_PORT, process.env.HTTP_PORT);
-  console.log("Started on localhost");
+  //require('./localhost')(app, process.env.HTTPS_PORT, process.env.HTTP_PORT);
+  app.listen(8000);
+  const d = new Date(); // for now
+  console.log(
+      `Started on localhost @ ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`);
 }
-
-
 
 app.use('/auth', authRoute);
