@@ -13,6 +13,12 @@ const create_user = async (req, res, next) => {
   const errors = validationResult(req);
 
   try {
+
+    //const isUsernameTaken = userModel.checkUsernameAvailability(req.body.username);
+
+    //const available = isUsernameTaken === undefined;
+    //console.log(available);
+
     if (!errors.isEmpty()) {
       console.log('Errors!!', errors);
       // Errors in validation
@@ -36,6 +42,7 @@ const create_user = async (req, res, next) => {
     }
   } catch (e) {
     console.error('e:', e);
+    res.status(400).json({message: 'Error insterting user!'});
   }
 };
 

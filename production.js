@@ -2,7 +2,7 @@
 
 module.exports = (app, port) => {
   // if ssl was included
-  /*
+
     app.enable('trust proxy');
 
     app.use((req, res, next) => {
@@ -16,7 +16,7 @@ module.exports = (app, port) => {
       }
     });
 
-   */
+
   //app.listen(port, () => console.log(`app listen on port ${port}`));
   app.listen(3000);
   console.log("App started on remote server");

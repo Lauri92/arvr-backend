@@ -27,5 +27,8 @@ if (process.env.NODE_ENV === 'production') {
   console.log(
       `Started on localhost @ ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`);
 }
+app.get('/', (req, res) => {
+  res.send('Hello Secure World!');
+});
 
 app.use('/auth', authRoute);
