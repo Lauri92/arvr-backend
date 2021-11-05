@@ -1,7 +1,7 @@
 'use strict';
 const {validationResult} = require('express-validator');
 const bcrypt = require('bcryptjs');
-const userModel = require('../Models/userModel');
+const userModel = require('../models/userModel');
 
 const get_message = async (req, res, next) => {
   console.log(req);
