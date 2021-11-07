@@ -12,7 +12,7 @@ const checkEnvironment = (app) => {
   }
 };
 const initializeMongoose = async () => {
-  await mongoose.connect('mongodb://127.0.0.1:27017/arvr_db');
+  await mongoose.connect(process.env.MONGOOSECONN);
 };
 
 module.exports = {

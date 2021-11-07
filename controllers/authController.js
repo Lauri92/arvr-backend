@@ -1,22 +1,26 @@
 'use strict';
 const {validationResult} = require('express-validator');
 const Schemas = require('../mongodb/schemas');
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const userModel = require('../models/arUserModel');
 
-const get_message = async (req, res, next) => {
+const get_message = async (req, res) => {
   res.status(200).send({message: 'Testing get route'});
 };
 
-const create_user = async (req, res, next) => {
+const create_user = async (req, res) => {
   // Extract the validation errors from a request.
   const errors = validationResult(req);
+  const lowerCaseBodyUsername = req.body.username.toLowerCase()
+  const bodyUsernameUppercase = lowerCaseBodyUsername.charAt(0).
+          toUpperCase() +
+      lowerCaseBodyUsername.slice(1);
 
   const checkDuplicate = await Schemas.arUserModel.findOne(
-      {username: `${req.body.username}`});
+      {username: `${bodyUsernameUppercase}`})
 
-  if (checkDuplicate === null) {
+  //console.log('\x1b[36m%s\x1b[0m', `${req.body.username.toLowerCase()}`);
+
+  if (checkDuplicate === undefined || checkDuplicate === null) {
     // Username doesn't exist
     try {
       if (!errors.isEmpty()) {
@@ -24,13 +28,11 @@ const create_user = async (req, res, next) => {
         console.log('Errors!!', errors);
         res.status(200).json({message: 'Errors in validation!'});
       } else {
-        console.log('No errors when posting user!');
-
         // No errors, salt and hash pw
         const salt = bcrypt.genSaltSync(10);
         req.body.password = bcrypt.hashSync(req.body.password, salt);
         const user = {
-          username: req.body.username,
+          username: bodyUsernameUppercase,
           password: req.body.password,
         };
 
@@ -38,16 +40,16 @@ const create_user = async (req, res, next) => {
           await Schemas.arUserModel.create(user);
           res.status(200).json({message: `${req.body.username} inserted!`});
         } catch (e) {
-          console.log(e.message);
           res.status(200).json({message: 'We failed to insert'});
         }
 
       }
     } catch (e) {
       console.error('e:', e);
-      res.status(400).json({message: 'Error insterting user!'});
+      res.status(400).json({message: 'Error inserting user!'});
     }
   } else {
+    // Username exists
     res.status(200).json({message: 'User name already exists!'});
   }
 
