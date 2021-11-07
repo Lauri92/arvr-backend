@@ -2,6 +2,8 @@
 const {validationResult} = require('express-validator');
 const Schemas = require('../mongodb/schemas');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const passport = require('passport');
 
 const get_message = async (req, res) => {
   res.status(200).send({message: 'Testing get route'});
@@ -54,7 +56,7 @@ const create_user = async (req, res) => {
       }
     } else {
       // Username exists
-      res.status(200).json({message: 'User name already exists!'});
+      res.status(200).json({message: 'Username already exists!'});
     }
   } catch (e) {
     res.status(200).json({message: 'Failed to insert 😣'});
@@ -62,7 +64,30 @@ const create_user = async (req, res) => {
 
 };
 
+const login = (req, res) => {
+  passport.authenticate('local', {session: false}, (err, user, info) => {
+    console.log('authcontroller user:', user);
+    if (err || !user) {
+      return res.status(200).json({message: `${info.message}`});
+    }
+    req.login(user, {session: false}, (err) => {
+      if (err) {
+        res.status(200).json({message: "Error logging in."})
+      }
+      const {username, _id} = user;
+      const tokenUser = {
+        id: _id,
+        username: username,
+      };
+      const token = jwt.sign({tokenUser}, process.env.JWT);
+      return res.status(200).json({message: token});
+    });
+
+  })(req, res);
+};
+
 module.exports = {
   get_message,
   create_user,
+  login,
 };

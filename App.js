@@ -3,11 +3,12 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const mongoose = require('mongoose');
+const passport = require('./utils/passportStrategies');
 const authRoute = require('./routes/authRoute');
 const utils = require('./utils/utils');
 
 const app = express();
+app.use(passport.initialize({}));
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
