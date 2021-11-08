@@ -27,8 +27,26 @@ passport.use(new Strategy(
         // was match
         return done(null, user);
       } catch (e) {
-        console.log("catch error", e.message);
+        console.log('catch error', e.message);
       }
     }));
+
+// Check token upon requesting from authentication requiring route
+passport.use(new JWTStrategy({
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.JWT,
+    },
+    async (jwtPayLoad, done) => {
+      try {
+        if (jwtPayLoad === undefined) {
+          return done(null, false, {message: 'Incorrect id.'});
+        }
+        // jwt matches
+        return done(null, {...jwtPayLoad}, {message: 'Logged in succesfully'});
+      } catch (err) {
+        return done(err);
+      }
+    },
+));
 
 module.exports = passport;

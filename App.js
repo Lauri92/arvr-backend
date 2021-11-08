@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const passport = require('./utils/passportStrategies');
 const authRoute = require('./routes/authRoute');
+const arItemRoute = require('./routes/arItemRoute');
 const utils = require('./utils/utils');
 
 const app = express();
@@ -22,3 +23,6 @@ utils.initializeMongoose().then(() => {
 });
 
 app.use('/auth', authRoute);
+app.use('/aritem',
+    passport.authenticate('jwt', {session: false}),
+    arItemRoute);

@@ -79,15 +79,21 @@ const login = (req, res) => {
         id: _id,
         username: username,
       };
-      const token = jwt.sign({tokenUser}, process.env.JWT);
+      const token = jwt.sign(tokenUser, process.env.JWT);
       return res.status(200).json({message: token});
     });
 
   })(req, res);
 };
 
+const logout = (req, res) => {
+  req.logout();
+  res.json({message: 'You have logged out'});
+};
+
 module.exports = {
   get_message,
   create_user,
   login,
+  logout,
 };
