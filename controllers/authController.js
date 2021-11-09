@@ -32,7 +32,7 @@ const create_user = async (req, res) => {
           const mappederrors = errors.errors.map((error) => {
             return `Input field: ${error.param}, error: ${error.msg}\n`;
           });
-          res.status(400).json({message: `${mappederrors}`});
+          res.status(400).send(`${mappederrors}`);
         } else {
           // No errors, salt and hash pw
           const salt = bcrypt.genSaltSync(10);
@@ -46,20 +46,20 @@ const create_user = async (req, res) => {
             await Schemas.arUserModel.create(user);
             res.status(200).json({message: `${req.body.username} inserted!`});
           } catch (e) {
-            res.status(400).json({message: 'We failed to insert'});
+            res.status(400).send('We failed to insert');
           }
 
         }
       } catch (e) {
         console.error('e:', e);
-        res.status(400).json({message: 'Error inserting user!'});
+        res.status(400).send('Error inserting user!😣');
       }
     } else {
       // Username exists
-      res.status(400).json({message: 'Username already exists!'});
+      res.status(400).send('Username already exists!😣');
     }
   } catch (e) {
-    res.status(400).json({message: 'Failed to insert 😣'});
+    res.status(400).send('Failed to insert 😣');
   }
 
 };
@@ -68,11 +68,11 @@ const login = (req, res) => {
   passport.authenticate('local', {session: false}, (err, user, info) => {
     console.log('authcontroller user:', user);
     if (err || !user) {
-      return res.status(400).json({message: `${info.message}`});
+      return res.status(400).send(`${info.message} 😣`);
     }
     req.login(user, {session: false}, (err) => {
       if (err) {
-        res.status(400).json({message: "Error logging in."})
+        res.status(400).send('Error logging in.');
       }
       const {username, _id} = user;
       const tokenUser = {
@@ -88,7 +88,7 @@ const login = (req, res) => {
 
 const logout = (req, res) => {
   req.logout();
-  res.json({message: 'You have logged out'});
+  res.send('You have logged out');
 };
 
 module.exports = {

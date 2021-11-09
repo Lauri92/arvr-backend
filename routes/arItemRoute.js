@@ -14,12 +14,9 @@ const upload = multer({
   }, mediaFileFilter,
 });
 
-const go_here = async (req, res, next) => {
-  console.log("got here");
-}
 
 router.route('/').
     get(arItemController.getSecuredItem).
-    post(upload.single('avatar'), go_here);
+    post(upload.single('avatar'), arItemController.postItem);
 
 module.exports = router;
