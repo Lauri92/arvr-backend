@@ -223,4 +223,7 @@ ssl-cert.pem
 ssl-key.pem
 certrequest.csr
 
+# uploaded files
+uploads
+
 # End of https://www.toptal.com/developers/gitignore/api/node,webstorm+all

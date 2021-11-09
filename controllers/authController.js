@@ -32,7 +32,7 @@ const create_user = async (req, res) => {
           const mappederrors = errors.errors.map((error) => {
             return `Input field: ${error.param}, error: ${error.msg}\n`;
           });
-          res.status(200).json({message: `${mappederrors}`});
+          res.status(400).json({message: `${mappederrors}`});
         } else {
           // No errors, salt and hash pw
           const salt = bcrypt.genSaltSync(10);
@@ -46,7 +46,7 @@ const create_user = async (req, res) => {
             await Schemas.arUserModel.create(user);
             res.status(200).json({message: `${req.body.username} inserted!`});
           } catch (e) {
-            res.status(200).json({message: 'We failed to insert'});
+            res.status(400).json({message: 'We failed to insert'});
           }
 
         }
@@ -56,10 +56,10 @@ const create_user = async (req, res) => {
       }
     } else {
       // Username exists
-      res.status(200).json({message: 'Username already exists!'});
+      res.status(400).json({message: 'Username already exists!'});
     }
   } catch (e) {
-    res.status(200).json({message: 'Failed to insert 😣'});
+    res.status(400).json({message: 'Failed to insert 😣'});
   }
 
 };
@@ -68,11 +68,11 @@ const login = (req, res) => {
   passport.authenticate('local', {session: false}, (err, user, info) => {
     console.log('authcontroller user:', user);
     if (err || !user) {
-      return res.status(200).json({message: `${info.message}`});
+      return res.status(400).json({message: `${info.message}`});
     }
     req.login(user, {session: false}, (err) => {
       if (err) {
-        res.status(200).json({message: "Error logging in."})
+        res.status(400).json({message: "Error logging in."})
       }
       const {username, _id} = user;
       const tokenUser = {
