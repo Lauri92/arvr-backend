@@ -6,76 +6,106 @@ const blobServiceClient = BlobServiceClient.fromConnectionString(
 const fs = require('fs');
 const FileType = require('file-type');
 const {validationResult} = require('express-validator');
+const Schemas = require('../mongodb/schemas');
 
 const getSecuredItem = async (req, res) => {
   res.status(200).send({message: 'Get secured item'});
 };
 
-const postItem = async (req, res, next) => {
-
-  const validationErrors = await validationResult(req);
-
-  if (!req.user.contentManager) {
-    try {
-      await fs.unlink(req.file.filename, err => {
-        if (err) throw err;
-      });
-      res.status(400).send('You are not allowed to post items!😑');
-    } catch (e) {
-      console.log(e.message);
-      res.status(400).send('You are not allowed to post items!😑');
-    }
-  } else if (!validationErrors.isEmpty()) {
-    const mappederrors = validationErrors.errors.map((error) => {
-      return `${error.param} error: ${error.msg}`;
+const handleNoContentManager = async (req, res) => {
+  try {
+    await fs.unlink(req.file.filename, err => {
+      if (err) throw err;
     });
-    try {
+    res.status(400).send('You are not allowed to post items!😑');
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send('You are not allowed to post items!😑');
+  }
+};
+
+const handleErrorsInValidation = async (req, res, validationErrors) => {
+  const mappedErrors = validationErrors.errors.map((error) => {
+    return `${error.param} error: ${error.msg}`;
+  });
+  try {
+    if (req.body.type) {
       await fs.unlink(req.file.filename, err => {
         if (err) throw err;
       });
-      res.status(400).send(mappederrors);
-    } catch (e) {
-      console.log(e.message);
-      res.status(400).send(mappederrors);
     }
-  } else {
-    try {
-      const containerName = 'images';
-      const containerClient = blobServiceClient.getContainerClient(
-          containerName);
-      const createContainerResponse = await containerClient.createIfNotExists();
-      console.log(`Create container ${containerName} successfully`,
-          createContainerResponse.succeeded);
-      // Upload the file
-      const filename = `${req.file.filename}`;
-      const filetype = await FileType.fromFile(filename);
-      const newName = `${filename}.${filetype.ext}`;
-      await fs.rename(filename, newName, () => {
-        console.log('renamed');
-      });
+    res.status(400).send(mappedErrors);
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send(mappedErrors);
+  }
+};
 
-      const blockBlobClient = containerClient.getBlockBlobClient(
-          newName);
-      await blockBlobClient.uploadFile(newName);
-      await fs.unlink(newName, err => {
-        if (err) throw err;
-      });
-      next();
-    } catch (e) {
-      console.log(e);
-      res.status(400).send('Failed to upload 😥');
-    }
+const insertImageToAzure = async (req, res, next) => {
+  try {
+    const containerName = 'images';
+    const containerClient = blobServiceClient.getContainerClient(
+        containerName);
+    const createContainerResponse = await containerClient.createIfNotExists();
+    console.log(`Create container ${containerName} successfully`,
+        createContainerResponse.succeeded);
+    // Upload the file
+    const filename = `${req.file.filename}`;
+    const filetype = await FileType.fromFile(filename);
+    const newName = `${filename}.${filetype.ext}`;
+    await fs.rename(filename, newName, () => {
+      console.log('renamed');
+    });
+
+    const blockBlobClient = containerClient.getBlockBlobClient(
+        newName);
+    await blockBlobClient.uploadFile(newName);
+    await fs.unlink(newName, err => {
+      if (err) throw err;
+    });
+    req.body.imageReference = newName;
+    next();
+  } catch (e) {
+    console.log(e);
+    res.status(400).send('Failed to upload 😥');
+  }
+};
+
+const validateItemInfoAndUploadToAzure = async (req, res, next) => {
+  const validationErrors = await validationResult(req);
+  if (!req.user.contentManager) {
+    await handleNoContentManager(req, res);
+  } else if (!validationErrors.isEmpty()) {
+    await handleErrorsInValidation(req, res, validationErrors);
+  } else {
+    await insertImageToAzure(req, res, next);
   }
 };
 
 const insertItemToDb = async (req, res, next) => {
-  console.log(req.user);
+  const arItem = {
+    userId: req.user.id,
+    type: req.body.type,
+    imageReference: req.body.imageReference,
+    name: req.body.name,
+    description: req.body.description,
+    latitude: req.body.latitude,
+    longitude: req.body.longitude,
+    category: req.body.category,
+    QRCode: '123',
+  };
 
-  res.status(200).send({message: 'Uploaded image to Azure!!🤗'});
+  try {
+    await Schemas.arItem.create(arItem);
+    res.status(200).send({message: 'Uploaded image to Azure and updated DB🤗'});
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).set('Failed to upload 🤔');
+  }
 };
 
 module.exports = {
   getSecuredItem,
-  postItem,
+  validateItemInfoAndUploadToAzure,
   insertItemToDb,
 };
