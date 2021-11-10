@@ -6,6 +6,7 @@ const blobServiceClient = BlobServiceClient.fromConnectionString(
 const fs = require('fs');
 const FileType = require('file-type');
 const {validationResult} = require('express-validator');
+const QRCode = require('qrcode');
 const Schemas = require('../mongodb/schemas');
 
 const getSecuredItem = async (req, res) => {
@@ -96,10 +97,24 @@ const insertItemToDb = async (req, res, next) => {
   };
 
   try {
-    await Schemas.arItem.create(arItem);
+    const inserted = await Schemas.arItem.create(arItem);
+    QRCode.toDataURL(inserted.id, {
+          errorCorrectionLevel: 'H', color: {
+            dark: '#0b9901',
+            light: '#ffffff',
+          },
+        },
+        async function(err, url) {
+          const doc = await Schemas.arItem.findById(inserted);
+          doc.QRCode = url;
+          await doc.save();
+        });
     res.status(200).send({message: 'Uploaded image to Azure and updated DB🤗'});
   } catch (e) {
     console.log(e.message);
+    await fs.unlink(req.body.imageReference, err => {
+      if (err) throw err;
+    });
     res.status(400).set('Failed to upload 🤔');
   }
 };
