@@ -120,16 +120,26 @@ const insertItemToDb = async (req, res) => {
 };
 
 const getSingleArItemById = async (req, res) => {
-  const doc = await Schemas.arItem.findById(req.params.id);
-  res.status(200).send(doc);
+  try {
+    const doc = await Schemas.arItem.findById(req.params.id);
+    res.status(200).send(doc);
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send('Failed to fetch AR item 🙁');
+  }
 };
 
 const getArItemsByContentManagerId = async (req, res) => {
-  const doc = await Schemas.arItem.
-      find({
-        userId: req.user.id,
-      });
-  res.status(200).send(doc);
+  try {
+    const doc = await Schemas.arItem.
+        find({
+          userId: req.user.id,
+        });
+    res.status(200).send(doc);
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send('Failed to fetch AR items 🙁');
+  }
 };
 
 module.exports = {
