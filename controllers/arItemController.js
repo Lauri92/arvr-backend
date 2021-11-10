@@ -83,7 +83,7 @@ const validateItemInfoAndUploadToAzure = async (req, res, next) => {
   }
 };
 
-const insertItemToDb = async (req, res, next) => {
+const insertItemToDb = async (req, res) => {
   const arItem = {
     userId: req.user.id,
     type: req.body.type,
@@ -119,8 +119,23 @@ const insertItemToDb = async (req, res, next) => {
   }
 };
 
+const getSingleArItemById = async (req, res) => {
+  const doc = await Schemas.arItem.findById(req.params.id);
+  res.status(200).send(doc);
+};
+
+const getArItemsByContentManagerId = async (req, res) => {
+  const doc = await Schemas.arItem.
+      find({
+        userId: req.user.id,
+      });
+  res.status(200).send(doc);
+};
+
 module.exports = {
   getSecuredItem,
   validateItemInfoAndUploadToAzure,
   insertItemToDb,
+  getSingleArItemById,
+  getArItemsByContentManagerId,
 };

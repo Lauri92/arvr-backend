@@ -22,6 +22,12 @@ router.route('/').
               isLength({min: 3}),
           body('type', 'Uploaded file is not an image!').matches('(?=image)'),
         ],
-        arItemController.validateItemInfoAndUploadToAzure, arItemController.insertItemToDb);
+        arItemController.validateItemInfoAndUploadToAzure,
+        arItemController.insertItemToDb);
+
+router.route('/contentmanager').
+    get(arItemController.getArItemsByContentManagerId);
+
+router.route('/:id').get(arItemController.getSingleArItemById);
 
 module.exports = router;
