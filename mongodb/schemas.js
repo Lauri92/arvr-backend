@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const ArUserSchema = new mongoose.Schema({
   username: {type: String, required: true},
   password: {type: String, required: true},
+  contentManager: {type: Boolean, required: true},
 });
 const arUserModel = mongoose.model('ArUser', ArUserSchema);
 

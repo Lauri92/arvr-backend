@@ -29,18 +29,28 @@ const create_user = async (req, res) => {
         if (!errors.isEmpty()) {
           // Errors in validation
           console.log('Errors!!', errors);
-          const mappederrors = errors.errors.map((error) => {
+          const mappedErrors = errors.errors.map((error) => {
             return `Input field: ${error.param}, error: ${error.msg}\n`;
           });
-          res.status(400).send(`${mappederrors}`);
+          res.status(400).send(`${mappedErrors}`);
         } else {
           // No errors, salt and hash pw
           const salt = bcrypt.genSaltSync(10);
           req.body.password = bcrypt.hashSync(req.body.password, salt);
-          const user = {
-            username: bodyUsernameUppercase,
-            password: req.body.password,
-          };
+          let user;
+          if (req.body.contentManager) {
+            user = {
+              username: bodyUsernameUppercase,
+              password: req.body.password,
+              contentManager: 1,
+            };
+          } else {
+            user = {
+              username: bodyUsernameUppercase,
+              password: req.body.password,
+              contentManager: 0,
+            };
+          }
 
           try {
             await Schemas.arUserModel.create(user);
@@ -74,10 +84,11 @@ const login = (req, res) => {
       if (err) {
         res.status(400).send('Error logging in.');
       }
-      const {username, _id} = user;
+      const {username, _id, contentManager} = user;
       const tokenUser = {
         id: _id,
         username: username,
+        contentManager: contentManager,
       };
       const token = jwt.sign(tokenUser, process.env.JWT);
       return res.status(200).json({message: token});
