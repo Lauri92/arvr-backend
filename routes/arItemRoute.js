@@ -7,7 +7,7 @@ const multerUtils = require('../utils/multerUtils');
 
 router.route('/').
     get(arItemController.getSecuredItem).
-    post(multerUtils.upload.single('avatar'), multerUtils.injectFile, [
+    post(multerUtils.uploadSingle.single('avatar'), multerUtils.injectFile, [
           body('description', 'Minimum length for description is 10 characters!').
               isLength({min: 10}),
           body('latitude',
@@ -24,6 +24,30 @@ router.route('/').
         ],
         arItemController.validateItemInfoAndUploadToAzure,
         arItemController.insertItemToDb);
+
+const cpUpload = multerUtils.upload3d.fields([
+  {name: 'gltf', maxCount: 1},
+  {name: 'bin', maxCount: 1},
+  {name: 'imageGallery', maxCount: 10}]);
+
+router.route('/3d').post(cpUpload, multerUtils.inject3dFileTypes, [
+      body('description', 'Minimum length for description is 10 characters!').
+          isLength({min: 10}),
+      body('latitude',
+          'Check provided latitude value! (Should be between -90 and 90 😀)').
+          isFloat({min: -90, max: 90}),
+      body('longitude',
+          'Check provided longitude value! (Should be between -180 and 180 😀)').
+          isFloat({min: -180, max: 180}),
+      body('category', 'Minimum length is 3 characters for category!').
+          isLength({min: 3}),
+      body('name', 'Minimum length is 3 characters for name!').
+          isLength({min: 3}),
+      body('type',
+          'Not required files are provided, check that you have uploaded the gltf file, bin file and required image files!').
+          matches('(?=3dObject)'),
+    ], arItemController.validate3dItemInfoAndUploadToAzure,
+    arItemController.insertItemToDb);
 
 router.route('/contentmanager').
     get(arItemController.getArItemsByContentManagerId);
