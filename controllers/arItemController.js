@@ -65,7 +65,7 @@ const insertImageToAzure = async (req, res, next) => {
     await fs.unlink(newName, err => {
       if (err) throw err;
     });
-    req.body.imageReference = newName;
+    req.body.imageReference = `images/${newName}`;
     next();
   } catch (e) {
     console.log(e);
@@ -104,7 +104,7 @@ const insert3dObjectToAzure = async (req, res, next, dir) => {
       await blockBlobClient.uploadFile(filename);
     }
 
-    req.body.imageReference = `${dir}/${req.files['gltf'][0].originalname}`;
+    req.body.imageReference = `objects/${dir}/${req.files['gltf'][0].originalname}`;
     fs.rmSync(dir, {recursive: true, force: true});
 
     next();

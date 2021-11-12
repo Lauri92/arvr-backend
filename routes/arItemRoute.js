@@ -44,7 +44,7 @@ router.route('/3d').post(cpUpload, multerUtils.inject3dFileTypes, [
       body('name', 'Minimum length is 3 characters for name!').
           isLength({min: 3}),
       body('type',
-          'Not required files are provided, check that you have uploaded the gltf file, bin file and required image files!').
+          'Not required files are provided, check that you have uploaded the gltf file, bin file and required/correct image files!').
           matches('(?=3dObject)'),
     ], arItemController.validate3dItemInfoAndUploadToAzure,
     arItemController.insertItemToDb);
