@@ -225,7 +225,7 @@ const insertItemToDb = async (req, res) => {
             light: '#ffffff',
           },
         },
-        async function(err, url) {
+        async (err, url) => {
           const doc = await Schemas.arItem.findById(inserted);
           doc.QRCode = url;
           await doc.save();
