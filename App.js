@@ -6,6 +6,7 @@ require('dotenv').config();
 const passport = require('./utils/passportStrategies');
 const authRoute = require('./routes/authRoute');
 const arItemRoute = require('./routes/arItemRoute');
+const userRoute = require('./routes/userRoute');
 const utils = require('./utils/utils');
 
 const app = express();
@@ -22,6 +23,5 @@ utils.initializeMongoose().then(() => {
 });
 
 app.use('/auth', authRoute);
-app.use('/aritem',
-    passport.authenticate('jwt', {session: false}),
-    arItemRoute);
+app.use('/user', passport.authenticate('jwt', {session: false}), userRoute);
+app.use('/aritem', passport.authenticate('jwt', {session: false}), arItemRoute);
