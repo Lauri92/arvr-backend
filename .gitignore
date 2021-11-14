@@ -226,4 +226,7 @@ certrequest.csr
 # uploaded files
 uploads
 
+# vscode
+.vscode
+
 # End of https://www.toptal.com/developers/gitignore/api/node,webstorm+all
