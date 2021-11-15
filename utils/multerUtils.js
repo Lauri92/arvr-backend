@@ -74,10 +74,10 @@ const checkGltfRequirements = async (req) => {
 
       const requiredImages = gltfInfo.images.map((image) => {
         return image.uri;
-      }).sort().toString();
+      }).sort().toString().replace(/%20/g, ' ');
       const submittedImages = req.files['imageGallery'].map((image) => {
         return image.originalname;
-      }).sort().toString();
+      }).sort().toString().replace(/%20/g, ' ');
 
       const requiredBin = gltfInfo.buffers[0].uri.toString();
       const submittedBin = req.files['bin'].map((bin) => {
