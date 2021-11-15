@@ -83,25 +83,30 @@ const insert3dObjectToAzure = async (req, res, next, dir) => {
     console.log(`Create container ${containerName} successfully`,
         createContainerResponse.succeeded);
     // Upload the file
-
-    for (const gltf of req.files['gltf']) {
-      const filename = `${dir}/${gltf.originalname}`;
-      const blockBlobClient = await containerClient.getBlockBlobClient(
-          filename);
-      await blockBlobClient.uploadFile(filename);
+    if (req.files['gltf']) {
+      for (const gltf of req.files['gltf']) {
+        const filename = `${dir}/${gltf.originalname}`;
+        const blockBlobClient = await containerClient.getBlockBlobClient(
+            filename);
+        await blockBlobClient.uploadFile(filename);
+      }
     }
-    for (const bin of req.files['bin']) {
-      const filename = `${dir}/${bin.originalname}`;
-      const blockBlobClient = await containerClient.getBlockBlobClient(
-          filename);
-      await blockBlobClient.uploadFile(filename);
+    if (req.files['bin']) {
+      for (const bin of req.files['bin']) {
+        const filename = `${dir}/${bin.originalname}`;
+        const blockBlobClient = await containerClient.getBlockBlobClient(
+            filename);
+        await blockBlobClient.uploadFile(filename);
+      }
     }
 
-    for (const image of req.files['imageGallery']) {
-      const filename = `${dir}/${image.originalname}`;
-      const blockBlobClient = await containerClient.getBlockBlobClient(
-          filename);
-      await blockBlobClient.uploadFile(filename);
+    if (req.files['imageGallery']) {
+      for (const image of req.files['imageGallery']) {
+        const filename = `${dir}/${image.originalname}`;
+        const blockBlobClient = await containerClient.getBlockBlobClient(
+            filename);
+        await blockBlobClient.uploadFile(filename);
+      }
     }
 
     req.body.imageReference = `objects/${dir}/${req.files['gltf'][0].originalname}`;
@@ -151,22 +156,27 @@ const unlink3dItems = async (req) => {
 const rename3dItemsToOriginalNameAndMoveToNewDirectory = async (req) => {
   const dir = uuidv4();
   await fs.mkdirSync(dir);
-  await fs.rename(`./uploads/${req.files['gltf'][0].filename}`,
-      `./${dir}/${req.files['gltf'][0].originalname}`,
-      () => {
-        console.log('moved?');
-      });
-  await fs.rename(`./uploads/${req.files['bin'][0].filename}`,
-      `./${dir}/${req.files['bin'][0].originalname}`,
-      () => {
-        console.log('moved?');
-      });
-
-  for (const image of req.files['imageGallery']) {
-    await fs.rename(`./uploads/${image.filename}`,
-        `./${dir}/${image.originalname}`, err => {
-          if (err) throw err;
+  if (req.files['gltf'][0].filename) {
+    await fs.rename(`./uploads/${req.files['gltf'][0].filename}`,
+        `./${dir}/${req.files['gltf'][0].originalname}`,
+        () => {
+          console.log('moved?');
         });
+  }
+  if (req.files['bin'][0].filename) {
+    await fs.rename(`./uploads/${req.files['bin'][0].filename}`,
+        `./${dir}/${req.files['bin'][0].originalname}`,
+        () => {
+          console.log('moved?');
+        });
+  }
+  if (req.files['imageGallery']) {
+    for (const image of req.files['imageGallery']) {
+      await fs.rename(`./uploads/${image.filename}`,
+          `./${dir}/${image.originalname}`, err => {
+            if (err) throw err;
+          });
+    }
   }
   return dir;
 };

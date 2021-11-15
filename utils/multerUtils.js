@@ -55,7 +55,7 @@ const injectFile = (req, res, next) => {
 const inject3dFileTypes = async (req, res, next) => {
 
   const matchingFiles = await checkGltfRequirements(req);
-  if (req.files['gltf'] && req.files['bin'] && req.files['imageGallery'] &&
+  if (req.files['gltf'] && req.files['bin'] &&
       matchingFiles) {
     console.log('Nothing is wrong!');
     req.body.type = '3dObject';
@@ -72,24 +72,28 @@ const checkGltfRequirements = async (req) => {
           `uploads/${req.files['gltf'][0].filename}`).toString();
       const gltfInfo = JSON.parse(contents);
 
-      const requiredImages = gltfInfo.images.map((image) => {
-        return image.uri;
-      }).sort().toString().replace(/%20/g, ' ');
-      const submittedImages = req.files['imageGallery'].map((image) => {
-        return image.originalname;
-      }).sort().toString().replace(/%20/g, ' ');
-
-      const requiredBin = gltfInfo.buffers[0].uri.toString();
+      let requiredImages = [];
+      let submittedImages = [];
+      if (req.files['imageGallery']) {
+        requiredImages = gltfInfo.images.map((image) => {
+          return image.uri;
+        }).sort().toString().replace(/%20/g, ' ');
+        submittedImages = req.files['imageGallery'].map((image) => {
+          return image.originalname;
+        }).sort().toString().replace(/%20/g, ' ');
+      }
+      const requiredBin = gltfInfo.buffers[0].uri.toString().
+          replace(/%20/g, ' ');
       const submittedBin = req.files['bin'].map((bin) => {
         return bin.originalname;
-      }).sort().toString();
+      }).sort().toString().replace(/%20/g, ' ');
 
-      return requiredImages === submittedImages && requiredBin === submittedBin;
+      return requiredImages.toString() === submittedImages.toString() && requiredBin === submittedBin;
     } else {
       return false;
     }
   } catch (e) {
-    console.log(e.message);
+    console.log(e);
     return false;
   }
 };
