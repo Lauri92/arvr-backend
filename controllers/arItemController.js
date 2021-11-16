@@ -285,22 +285,44 @@ const updateItem = async (req, res) => {
   ];
 
   if (allowedParams.includes(req.query.param)) {
-    const validationErrors = await validationResult(req);
-    console.log(req.query.param);
+    try {
+      const validationErrors = await validationResult(req);
 
-    const fieldErrors = validationErrors.errors.filter((errorParam) => {
-      return req.query.param === errorParam.param;
-    });
+      const fieldErrors = validationErrors.errors.filter((errorParam) => {
+        return req.query.param === errorParam.param;
+      });
 
-    console.log(fieldErrors);
+      const objectToBeUpdated = await Schemas.arItem.findOne(
+          {'_id': req.params.aritemid});
 
-    if (fieldErrors[0]) {
-      res.status(400).send(fieldErrors[0].msg);
-    } else {
-      res.status(200).send(`No errors in ${req.query.param}`);
+      if (fieldErrors[0]) {
+        res.status(400).send(fieldErrors[0].msg);
+      } else if (objectToBeUpdated.userId !== req.user.id) {
+        res.status(400).send('Cheeky cheeky 🤨');
+      } else {
+        let bodyValue;
+        const getBodyValue = {
+          'description': () => bodyValue = req.body.description,
+          'latitude': () => bodyValue = req.body.latitude,
+          'longitude': () => bodyValue = req.body.longitude,
+          'category': () => bodyValue = req.body.category,
+          'name': () => bodyValue = req.body.name,
+          'default': () => res.status(400).send('Failed to insert'),
+        };
+
+        await (getBodyValue[req.query.param] || getBodyValue['default'])();
+
+        const filter = {'_id': req.params.aritemid};
+        const updateColumn = {[req.query.param]: bodyValue};
+        await Schemas.arItem.updateOne(filter, updateColumn);
+        res.status(200).json({message: `Updated ${req.query.param}`});
+      }
+    } catch (e) {
+      console.log(e.message);
+      res.status(400).send('Failed to update');
     }
   } else {
-    res.status(400).send('Check your param (?param=....)');
+    res.status(400).send('Failed to update, check param');
   }
 };
 

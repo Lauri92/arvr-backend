@@ -52,7 +52,7 @@ router.route('/3d').post(cpUpload, multerUtils.inject3dFileTypes, [
 router.route('/contentmanager').
     get(arItemController.getArItemsByContentManagerId);
 
-router.route('/update').
+router.route('/update/:aritemid').
     patch([
       body('description',
           'Minimum length for description is 10 characters!').
