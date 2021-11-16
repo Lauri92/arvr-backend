@@ -274,6 +274,36 @@ const getArItemsByContentManagerId = async (req, res) => {
   }
 };
 
+const updateItem = async (req, res) => {
+
+  const allowedParams = [
+    'description',
+    'latitude',
+    'longitude',
+    'name',
+    'category',
+  ];
+
+  if (allowedParams.includes(req.query.param)) {
+    const validationErrors = await validationResult(req);
+    console.log(req.query.param);
+
+    const fieldErrors = validationErrors.errors.filter((errorParam) => {
+      return req.query.param === errorParam.param;
+    });
+
+    console.log(fieldErrors);
+
+    if (fieldErrors[0]) {
+      res.status(400).send(fieldErrors[0].msg);
+    } else {
+      res.status(200).send(`No errors in ${req.query.param}`);
+    }
+  } else {
+    res.status(400).send('Check your param (?param=....)');
+  }
+};
+
 module.exports = {
   getSecuredItem,
   validateItemInfoAndUploadToAzure,
@@ -281,4 +311,5 @@ module.exports = {
   insertItemToDb,
   getSingleArItemById,
   getArItemsByContentManagerId,
+  updateItem,
 };
