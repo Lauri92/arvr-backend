@@ -30,6 +30,9 @@ router.route('/contentmanager').
 router.route('/update/:aritemid').
     patch(validationUtils.updateValidations, arItemController.updateItem);
 
+router.route('/delete/:aritemid').
+    delete(arItemController.deleteItem)
+
 router.route('/:id').get(arItemController.getSingleArItemById);
 
 module.exports = router;
