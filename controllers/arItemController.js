@@ -326,6 +326,44 @@ const updateItem = async (req, res) => {
   }
 };
 
+const deleteItem = async (req, res) => {
+
+  try {
+    const filter = {'_id': req.params.aritemid};
+    const itemToBeRemoved = await Schemas.arItem.findOne(filter);
+    console.log(itemToBeRemoved.imageReference);
+
+    const itemId = itemToBeRemoved.imageReference.substring(8, 44);
+    console.log(itemId);
+    const container = await blobServiceClient.getContainerClient(`objects`);
+    let blobs = container.listBlobsFlat();
+    let blob = await blobs.next();
+    let objectFiles = [];
+    while (!blob.done) {
+      if (blob.value.name.includes(itemId)) {
+        objectFiles.push(blob.value.name);
+      }
+      blob = await blobs.next();
+    }
+    console.log(objectFiles);
+
+    for (const file of objectFiles) {
+      await container.deleteBlob(file);
+    }
+
+    Schemas.arItem.deleteOne(filter, function(err) {
+      if (err) {
+        console.log(err);
+        res.status(400).send('Failed to remove');
+      }
+    });
+    res.status(200).json({message: 'Removed item successfully'});
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send(`Failed to remove item ${e.message}`);
+  }
+};
+
 module.exports = {
   getSecuredItem,
   validateItemInfoAndUploadToAzure,
@@ -334,4 +372,5 @@ module.exports = {
   getSingleArItemById,
   getArItemsByContentManagerId,
   updateItem,
+  deleteItem,
 };
