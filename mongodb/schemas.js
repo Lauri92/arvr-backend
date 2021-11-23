@@ -17,6 +17,7 @@ const ArItemSchema = new mongoose.Schema({
   latitude: {type: Number, required: true},
   longitude: {type: Number, required: true},
   category: {type: String, required: true},
+  pois : { type : Array , "default" : [] },
   QRCode: {type: String, required: true},
 });
 const arItem = mongoose.model('ArItem', ArItemSchema);

@@ -1,5 +1,5 @@
 'use strict';
-const {body} = require('express-validator');
+const {body, check} = require('express-validator');
 
 const registerValidations = [
   body('username', 'Minimum length 3 characters!').
@@ -43,6 +43,21 @@ const postImageValidations = [
   body('type', 'Uploaded file is not an image!').matches('(?=image)'),
 ];
 
+const postPoiValidations = [
+  body('name', 'Minimum length for description is 3 characters!').
+      isLength({min: 3}),
+  body('description',
+      'Minumum length for poi description is 10 characters!').
+      isLength({min: 10}),
+  body('x',
+      'Must be a number!').
+      isFloat(),
+  body('y', 'Must be a number!').
+      isFloat(),
+  body('z', 'Must be a number!').
+      isFloat(),
+];
+
 const updateValidations = [
   body('description',
       'Minimum length for description is 10 characters!').
@@ -64,4 +79,5 @@ module.exports = {
   updateValidations,
   post3dValidations,
   postImageValidations,
+  postPoiValidations,
 };

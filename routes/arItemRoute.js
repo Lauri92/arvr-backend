@@ -27,11 +27,16 @@ router.route('/3d').
 router.route('/contentmanager').
     get(arItemController.getArItemsByContentManagerId);
 
+router.route('/pois/:aritemid').
+    post(validationUtils.postPoiValidations,
+        arItemController.postPointsOfInterest).
+    delete(arItemController.deletePointOfInterest);
+
 router.route('/update/:aritemid').
     patch(validationUtils.updateValidations, arItemController.updateItem);
 
 router.route('/delete/:aritemid').
-    delete(arItemController.deleteItem)
+    delete(arItemController.deleteItem);
 
 router.route('/:id').get(arItemController.getSingleArItemById);
 

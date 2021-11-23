@@ -364,6 +364,54 @@ const deleteItem = async (req, res) => {
   }
 };
 
+const postPointsOfInterest = async (req, res) => {
+
+  try {
+    const validationErrors = await validationResult(req);
+    const objectToBeUpdated = await Schemas.arItem.findOne(
+        {'_id': req.params.aritemid});
+    if (!validationErrors.isEmpty()) {
+      res.send(validationErrors.array());
+    } else if (objectToBeUpdated.userId !== req.user.id) {
+      res.status(400).send('Cheeky cheeky');
+    } else {
+      const id = uuidv4();
+      const poi = {
+        poiId: id,
+        name: req.body.name,
+        description: req.body.description,
+        x: req.body.x,
+        y: req.body.y,
+        z: req.body.z,
+      };
+      const filter = {'_id': req.params.aritemid};
+      await Schemas.arItem.updateOne(filter,
+          {
+            $push: {pois: poi},
+          });
+
+      res.status(200).json({message: 'Added a new point of interest!'});
+    }
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send('Failed to upload poi!');
+  }
+};
+
+const deletePointOfInterest = async (req, res) => {
+
+  const objectToBeUpdated = await Schemas.arItem.findOne(
+      {'_id': req.params.aritemid});
+  if (objectToBeUpdated.userId !== req.user.id) {
+    res.status(400).send('Cheeky cheeky');
+  } else {
+    await Schemas.arItem.findOneAndUpdate({_id: req.params.aritemid},
+        {$pull: {pois: {poiId: req.query.id}}});
+
+    res.status(200).json({message: 'Made it through'});
+  }
+};
+
 module.exports = {
   getSecuredItem,
   validateItemInfoAndUploadToAzure,
@@ -373,4 +421,6 @@ module.exports = {
   getArItemsByContentManagerId,
   updateItem,
   deleteItem,
+  postPointsOfInterest,
+  deletePointOfInterest,
 };
