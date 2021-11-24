@@ -31,6 +31,7 @@ const upload3d = multer({
         return cb(null, false, new Error('Not a bin file!'));
       }
     } else if (file.fieldname === 'gltf') {
+      console.log(file);
       if (file.mimetype.includes('gltf')) {
         return cb(null, true);
       } else {
