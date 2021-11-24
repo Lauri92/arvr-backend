@@ -18,6 +18,7 @@ const uploadSingle = multer({
 const upload3d = multer({
   dest: './uploads',
   fileFilter: (req, file, cb) => {
+    console.log('fileFilter before conditions: ', file);
     if (file.fieldname === 'imageGallery') {
       if (file.mimetype.includes('image')) {
         return cb(null, true);
@@ -91,7 +92,8 @@ const checkGltfRequirements = async (req) => {
         return bin.originalname;
       }).sort().toString().replace(/%20/g, ' ');
 
-      return requiredImages.toString() === submittedImages.toString() && requiredBin === submittedBin;
+      return requiredImages.toString() === submittedImages.toString() &&
+          requiredBin === submittedBin;
     } else {
       return false;
     }
