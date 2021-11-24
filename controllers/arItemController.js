@@ -380,9 +380,9 @@ const postPointsOfInterest = async (req, res) => {
         poiId: id,
         name: req.body.name,
         description: req.body.description,
-        x: req.body.x,
-        y: req.body.y,
-        z: req.body.z,
+        x: Number(req.body.x),
+        y: Number(req.body.y),
+        z: Number(req.body.z),
       };
       const filter = {'_id': req.params.aritemid};
       await Schemas.arItem.updateOne(filter,
@@ -400,15 +400,20 @@ const postPointsOfInterest = async (req, res) => {
 
 const deletePointOfInterest = async (req, res) => {
 
-  const objectToBeUpdated = await Schemas.arItem.findOne(
-      {'_id': req.params.aritemid});
-  if (objectToBeUpdated.userId !== req.user.id) {
-    res.status(400).send('Cheeky cheeky');
-  } else {
-    await Schemas.arItem.findOneAndUpdate({_id: req.params.aritemid},
-        {$pull: {pois: {poiId: req.query.id}}});
+  try {
+    const objectToBeUpdated = await Schemas.arItem.findOne(
+        {'_id': req.params.aritemid});
+    if (objectToBeUpdated.userId !== req.user.id) {
+      res.status(400).send('Cheeky cheeky');
+    } else {
+      await Schemas.arItem.findOneAndUpdate({_id: req.params.aritemid},
+          {$pull: {pois: {poiId: req.query.id}}});
 
-    res.status(200).json({message: 'Made it through'});
+      res.status(200).json({message: 'Removed point of interest from this ARItem!'});
+    }
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send('Failed to remove');
   }
 };
 
