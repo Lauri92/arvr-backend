@@ -38,6 +38,8 @@ const upload3d = multer({
         return cb(null, false, new Error('Not a gltf file!'));
       }
     } else {
+      console.log('Not a good file');
+      console.log(file);
       return cb(null, false, new Error('Wrong file type!!'));
     }
   }, onError: function(err, next) {
