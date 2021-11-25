@@ -446,9 +446,9 @@ const postPointsOfInterest = async (req, res) => {
         poiId: id,
         name: req.body.name,
         description: req.body.description,
-        x: req.body.x,
-        y: req.body.y,
-        z: req.body.z,
+        x: Number(req.body.x),
+        y: Number(req.body.y),
+        z: Number(req.body.z),
         poiImage: req.body.poiImage,
       };
       const filter = {'_id': req.params.aritemid};

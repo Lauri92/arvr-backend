@@ -25,13 +25,16 @@ const upload3d = multer({
         return cb(null, false, new Error('Not an image!'));
       }
     } else if (file.fieldname === 'bin') {
-      if (file.mimetype.includes('octet-stream')) {
+      if (file.mimetype.includes('octet-stream') ||
+          file.mimetype.includes('application/macbinary')) {
         return cb(null, true);
       } else {
         return cb(null, false, new Error('Not a bin file!'));
       }
     } else if (file.fieldname === 'gltf') {
-      if (file.mimetype.includes('gltf')) {
+      console.log(file);
+      if (file.mimetype.includes('gltf') ||
+          file.mimetype.includes('application/octet-stream')) {
         return cb(null, true);
       } else {
         return cb(null, false, new Error('Not a gltf file!'));
@@ -53,7 +56,6 @@ const upload3d = multer({
 
 const injectFile = (req, res, next) => {
   if (req.file) {
-    console.log('Got to inject');
     req.body.type = req.file.mimetype;
   }
   next();
