@@ -251,7 +251,7 @@ const insertItemToDb = async (req, res) => {
     userId: req.user.id,
     type: req.body.type,
     objectReference: req.body.objectReference,
-    logoImageReference : req.body.logoImageReference,
+    logoImageReference: req.body.logoImageReference,
     name: req.body.name,
     description: req.body.description,
     latitude: req.body.latitude,
@@ -409,6 +409,39 @@ const postPointsOfInterest = async (req, res) => {
       res.status(400).send('Cheeky cheeky');
     } else {
       const id = uuidv4();
+      if (req.body.type) {
+        try {
+          const containerName = 'poiimages';
+          const containerClient = blobServiceClient.getContainerClient(
+              containerName);
+          const createContainerResponse = await containerClient.createIfNotExists();
+          console.log(`Create container ${containerName} successfully`,
+              createContainerResponse.succeeded);
+          // Upload the file
+          const filename = `${req.file.filename}`;
+          const filetype = await FileType.fromFile(filename);
+          const newName = `${filename}.${filetype.ext}`;
+          await fs.rename(filename, newName, () => {
+            console.log('renamed');
+          });
+          const blockBlobClient = containerClient.getBlockBlobClient(
+              newName);
+          await blockBlobClient.uploadFile(newName);
+          await fs.unlink(newName, err => {
+            if (err) throw err;
+          });
+          req.body.poiImage = `poiimages/${newName}`;
+        } catch (e) {
+          console.log(e);
+          const filename = `${req.file.filename}`;
+          await fs.unlink(filename, err => {
+            if (err) throw err;
+          });
+          res.status(400).send('Failed to upload 😥');
+        }
+      } else {
+        req.body.poiImage = `poiimages/poidefault`;
+      }
       const poi = {
         poiId: id,
         name: req.body.name,
@@ -416,6 +449,7 @@ const postPointsOfInterest = async (req, res) => {
         x: req.body.x,
         y: req.body.y,
         z: req.body.z,
+        poiImage: req.body.poiImage,
       };
       const filter = {'_id': req.params.aritemid};
       await Schemas.arItem.updateOne(filter,
@@ -433,15 +467,31 @@ const postPointsOfInterest = async (req, res) => {
 
 const deletePointOfInterest = async (req, res) => {
 
-  const objectToBeUpdated = await Schemas.arItem.findOne(
-      {'_id': req.params.aritemid});
-  if (objectToBeUpdated.userId !== req.user.id) {
-    res.status(400).send('Cheeky cheeky');
-  } else {
-    await Schemas.arItem.findOneAndUpdate({_id: req.params.aritemid},
-        {$pull: {pois: {poiId: req.query.id}}});
+  try {
+    const objectToBeUpdated = await Schemas.arItem.findOne(
+        {'_id': req.params.aritemid});
+    if (objectToBeUpdated.userId !== req.user.id) {
+      res.status(400).send('Cheeky cheeky');
+    } else {
+      const testertester = await Schemas.arItem.findOneAndUpdate(
+          {_id: req.params.aritemid},
+          {$pull: {pois: {poiId: req.query.id}}});
+      const pois = testertester.pois;
+      const azureImageUrl = pois.filter((poi) => {
+        return poi.poiId === req.query.id;
+      });
+      if (azureImageUrl[0].poiImage !== 'poiimages/poidefault') {
+        const blobToDelete = azureImageUrl[0].poiImage.substring(10).toString();
+        const container = await blobServiceClient.getContainerClient(
+            `poiimages`);
+        await container.deleteBlob(blobToDelete);
+      }
 
-    res.status(200).json({message: 'Made it through'});
+      res.status(200).json({message: 'Removed point of interest!'});
+    }
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send('Failed to remove poi');
   }
 };
 

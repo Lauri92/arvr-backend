@@ -53,6 +53,7 @@ const upload3d = multer({
 
 const injectFile = (req, res, next) => {
   if (req.file) {
+    console.log('Got to inject');
     req.body.type = req.file.mimetype;
   }
   next();
