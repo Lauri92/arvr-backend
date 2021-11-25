@@ -31,15 +31,18 @@ const upload3d = multer({
         return cb(null, false, new Error('Not a bin file!'));
       }
     } else if (file.fieldname === 'gltf') {
-      console.log(file);
       if (file.mimetype.includes('gltf')) {
         return cb(null, true);
       } else {
         return cb(null, false, new Error('Not a gltf file!'));
       }
+    } else if (file.fieldname === 'logoImageReference') {
+      if (file.mimetype.includes('image')) {
+        return cb(null, true);
+      } else {
+        return cb(null, false, new Error('Not an image!'));
+      }
     } else {
-      console.log('Not a good file');
-      console.log(file);
       return cb(null, false, new Error('Wrong file type!!'));
     }
   }, onError: function(err, next) {
@@ -59,7 +62,7 @@ const inject3dFileTypes = async (req, res, next) => {
 
   const matchingFiles = await checkGltfRequirements(req);
   if (req.files['gltf'] && req.files['bin'] &&
-      matchingFiles) {
+      req.files['logoImageReference'] && matchingFiles) {
     console.log('Nothing is wrong!');
     req.body.type = '3dObject';
   } else {
@@ -91,7 +94,8 @@ const checkGltfRequirements = async (req) => {
         return bin.originalname;
       }).sort().toString().replace(/%20/g, ' ');
 
-      return requiredImages.toString() === submittedImages.toString() && requiredBin === submittedBin;
+      return requiredImages.toString() === submittedImages.toString() &&
+          requiredBin === submittedBin;
     } else {
       return false;
     }

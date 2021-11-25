@@ -16,10 +16,12 @@ router.route('/').
 const cpUpload = multerUtils.upload3d.fields([
   {name: 'gltf', maxCount: 1},
   {name: 'bin', maxCount: 1},
+  {name: 'logoImageReference', maxCount: 1},
   {name: 'imageGallery', maxCount: 300}]);
 
 router.route('/3d').
-    post(cpUpload, multerUtils.inject3dFileTypes,
+    post(cpUpload,
+        multerUtils.inject3dFileTypes,
         validationUtils.post3dValidations,
         arItemController.validate3dItemInfoAndUploadToAzure,
         arItemController.insertItemToDb);

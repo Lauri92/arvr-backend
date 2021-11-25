@@ -23,7 +23,7 @@ const post3dValidations = [
   body('name', 'Minimum length is 3 characters for name!').
       isLength({min: 3}),
   body('type',
-      'Not required files are provided, check that you have uploaded the gltf file, bin file and required/correct image files!').
+      'Not required files are provided, check that you have uploaded the gltf file, bin file and required/correct image files and logo image!').
       matches('(?=3dObject)'),
 ];
 

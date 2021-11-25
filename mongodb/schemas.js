@@ -11,7 +11,8 @@ const arUserModel = mongoose.model('ArUser', ArUserSchema);
 const ArItemSchema = new mongoose.Schema({
   userId: {type: String, required: true},
   type: {type: String, required: true},
-  imageReference: {type: String, required: true},
+  objectReference: {type: String, required: true},
+  logoImageReference: {type: String, required: true},
   name: {type: String, required: true},
   description: {type: String, required: true},
   latitude: {type: Number, required: true},

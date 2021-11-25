@@ -65,7 +65,7 @@ const insertImageToAzure = async (req, res, next) => {
     await fs.unlink(newName, err => {
       if (err) throw err;
     });
-    req.body.imageReference = `images/${newName}`;
+    req.body.objectReference = `images/${newName}`;
     next();
   } catch (e) {
     console.log(e);
@@ -100,6 +100,15 @@ const insert3dObjectToAzure = async (req, res, next, dir) => {
       }
     }
 
+    if (req.files['logoImageReference']) {
+      for (const logoImage of req.files['logoImageReference']) {
+        const filename = `${dir}/${logoImage.originalname}`;
+        const blockBlobClient = await containerClient.getBlockBlobClient(
+            filename);
+        await blockBlobClient.uploadFile(filename);
+      }
+    }
+
     if (req.files['imageGallery']) {
       for (const image of req.files['imageGallery']) {
         const filename = `${dir}/${image.originalname}`;
@@ -109,7 +118,8 @@ const insert3dObjectToAzure = async (req, res, next, dir) => {
       }
     }
 
-    req.body.imageReference = `objects/${dir}/${req.files['gltf'][0].originalname}`;
+    req.body.objectReference = `objects/${dir}/${req.files['gltf'][0].originalname}`;
+    req.body.logoImageReference = `objects/${dir}/${req.files['logoImageReference'][0].originalname}`;
     fs.rmSync(dir, {recursive: true, force: true});
 
     next();
@@ -144,6 +154,13 @@ const unlink3dItems = async (req) => {
           if (err) throw err;
         });
   }
+
+  if (req.files['logoImageReference']) {
+    await fs.unlink(`./uploads/${req.files['logoImageReference'][0].filename}`,
+        err => {
+          if (err) throw err;
+        });
+  }
   if (req.files['imageGallery']) {
     for (const image of req.files['imageGallery']) {
       await fs.unlink(`./uploads/${image.filename}`, err => {
@@ -153,32 +170,46 @@ const unlink3dItems = async (req) => {
   }
 };
 
-const rename3dItemsToOriginalNameAndMoveToNewDirectory = async (req) => {
-  const dir = uuidv4();
-  await fs.mkdirSync(dir);
-  if (req.files['gltf'][0].filename) {
-    await fs.rename(`./uploads/${req.files['gltf'][0].filename}`,
-        `./${dir}/${req.files['gltf'][0].originalname}`,
-        () => {
-          console.log('moved?');
-        });
-  }
-  if (req.files['bin'][0].filename) {
-    await fs.rename(`./uploads/${req.files['bin'][0].filename}`,
-        `./${dir}/${req.files['bin'][0].originalname}`,
-        () => {
-          console.log('moved?');
-        });
-  }
-  if (req.files['imageGallery']) {
-    for (const image of req.files['imageGallery']) {
-      await fs.rename(`./uploads/${image.filename}`,
-          `./${dir}/${image.originalname}`, err => {
-            if (err) throw err;
+const rename3dItemsToOriginalNameAndMoveToNewDirectory = async (req, res) => {
+  try {
+    const dir = uuidv4();
+    await fs.mkdirSync(dir);
+    if (req.files['gltf'][0].filename) {
+      await fs.rename(`./uploads/${req.files['gltf'][0].filename}`,
+          `./${dir}/${req.files['gltf'][0].originalname}`,
+          () => {
+            console.log('moved?');
           });
     }
+    if (req.files['bin'][0].filename) {
+      await fs.rename(`./uploads/${req.files['bin'][0].filename}`,
+          `./${dir}/${req.files['bin'][0].originalname}`,
+          () => {
+            console.log('moved?');
+          });
+    }
+    if (req.files['logoImageReference'][0].filename) {
+      await fs.rename(
+          `./uploads/${req.files['logoImageReference'][0].filename}`,
+          `./${dir}/${req.files['logoImageReference'][0].originalname}`,
+          () => {
+            console.log('moved?');
+          });
+    }
+    if (req.files['imageGallery']) {
+      for (const image of req.files['imageGallery']) {
+        await fs.rename(`./uploads/${image.filename}`,
+            `./${dir}/${image.originalname}`, err => {
+              if (err) throw err;
+            });
+      }
+    }
+    return dir;
+  } catch (e) {
+    console.log(e.message);
+    await unlink3dItems(req);
+    res.send(400).send('Failed to upload');
   }
-  return dir;
 };
 
 const validate3dItemInfoAndUploadToAzure = async (req, res, next) => {
@@ -204,7 +235,8 @@ const validate3dItemInfoAndUploadToAzure = async (req, res, next) => {
     }
   } else {
     try {
-      const dir = await rename3dItemsToOriginalNameAndMoveToNewDirectory(req);
+      const dir = await rename3dItemsToOriginalNameAndMoveToNewDirectory(req,
+          res);
       await insert3dObjectToAzure(req, res, next, dir);
     } catch (e) {
       await unlink3dItems(req);
@@ -218,7 +250,8 @@ const insertItemToDb = async (req, res) => {
   const arItem = {
     userId: req.user.id,
     type: req.body.type,
-    imageReference: req.body.imageReference,
+    objectReference: req.body.objectReference,
+    logoImageReference : req.body.logoImageReference,
     name: req.body.name,
     description: req.body.description,
     latitude: req.body.latitude,
@@ -244,7 +277,7 @@ const insertItemToDb = async (req, res) => {
         send({message: 'Uploaded item to Azure and updated DB🤗'});
   } catch (e) {
     console.log(e.message);
-    await fs.unlink(req.body.imageReference, err => {
+    await fs.unlink(req.body.objectReference, err => {
       if (err) throw err;
     });
     res.status(400).set('Failed to upload 🤔');
@@ -331,9 +364,9 @@ const deleteItem = async (req, res) => {
   try {
     const filter = {'_id': req.params.aritemid};
     const itemToBeRemoved = await Schemas.arItem.findOne(filter);
-    console.log(itemToBeRemoved.imageReference);
+    console.log(itemToBeRemoved.objectReference);
 
-    const itemId = itemToBeRemoved.imageReference.substring(8, 44);
+    const itemId = itemToBeRemoved.objectReference.substring(8, 44);
     console.log(itemId);
     const container = await blobServiceClient.getContainerClient(`objects`);
     let blobs = container.listBlobsFlat();
