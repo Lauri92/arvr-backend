@@ -364,12 +364,14 @@ const deleteItem = async (req, res) => {
   try {
     const filter = {'_id': req.params.aritemid};
     const itemToBeRemoved = await Schemas.arItem.findOne(filter);
-    console.log(itemToBeRemoved.objectReference);
+    const poisToBeRemoved = itemToBeRemoved.pois;
 
     const itemId = itemToBeRemoved.objectReference.substring(8, 44);
-    console.log(itemId);
-    const container = await blobServiceClient.getContainerClient(`objects`);
-    let blobs = container.listBlobsFlat();
+    const objectContainer = await blobServiceClient.getContainerClient(
+        `objects`);
+    const poiImageContainer = await blobServiceClient.getContainerClient(
+        `poiimages`);
+    let blobs = objectContainer.listBlobsFlat();
     let blob = await blobs.next();
     let objectFiles = [];
     while (!blob.done) {
@@ -378,10 +380,18 @@ const deleteItem = async (req, res) => {
       }
       blob = await blobs.next();
     }
-    console.log(objectFiles);
 
+    // Remove the 3D files
     for (const file of objectFiles) {
-      await container.deleteBlob(file);
+      await objectContainer.deleteBlob(file);
+    }
+
+    // Remove the poi images
+    for (const poi of poisToBeRemoved) {
+      if (poi.poiImage !== 'poiimages/poidefault') {
+        await poiImageContainer.deleteBlob(poi.poiImage.substring(10));
+        //console.log(poi.poiImage.substring(10));
+      }
     }
 
     Schemas.arItem.deleteOne(filter, function(err) {
@@ -390,6 +400,7 @@ const deleteItem = async (req, res) => {
         res.status(400).send('Failed to remove');
       }
     });
+
     res.status(200).json({message: 'Removed item successfully'});
   } catch (e) {
     console.log(e.message);
@@ -404,7 +415,7 @@ const postPointsOfInterest = async (req, res) => {
     const objectToBeUpdated = await Schemas.arItem.findOne(
         {'_id': req.params.aritemid});
     if (!validationErrors.isEmpty()) {
-      res.send(validationErrors.array());
+      res.status(400).send(validationErrors.array());
     } else if (objectToBeUpdated.userId !== req.user.id) {
       res.status(400).send('Cheeky cheeky');
     } else {
@@ -412,29 +423,30 @@ const postPointsOfInterest = async (req, res) => {
       if (req.body.type) {
         try {
           const containerName = 'poiimages';
-          const containerClient = blobServiceClient.getContainerClient(
+          const containerClient = await blobServiceClient.getContainerClient(
               containerName);
           const createContainerResponse = await containerClient.createIfNotExists();
           console.log(`Create container ${containerName} successfully`,
               createContainerResponse.succeeded);
-          // Upload the file
           const filename = `${req.file.filename}`;
-          const filetype = await FileType.fromFile(filename);
-          const newName = `${filename}.${filetype.ext}`;
-          await fs.rename(filename, newName, () => {
-            console.log('renamed');
-          });
-          const blockBlobClient = containerClient.getBlockBlobClient(
-              newName);
-          await blockBlobClient.uploadFile(newName);
-          await fs.unlink(newName, err => {
+          // const filetype = await FileType.fromFile(filename);
+          //const newName = `${filename}.${filetype.ext}`;
+          //await fs.rename(filename, newName, () => {
+          //console.log('renamed');
+          //});
+          const blockBlobClient = await containerClient.getBlockBlobClient(
+              filename);
+          await blockBlobClient.uploadFile(filename);
+          await fs.unlink(filename, err => {
             if (err) throw err;
           });
-          req.body.poiImage = `poiimages/${newName}`;
+          req.body.poiImage = `poiimages/${filename}`;
         } catch (e) {
           console.log(e);
           const filename = `${req.file.filename}`;
-          await fs.unlink(filename, err => {
+          const filetype = await FileType.fromFile(filename);
+          const newName = `${filename}.${filetype.ext}`;
+          await fs.unlink(newName, err => {
             if (err) throw err;
           });
           res.status(400).send('Failed to upload 😥');

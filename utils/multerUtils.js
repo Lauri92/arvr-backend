@@ -4,7 +4,6 @@ const fs = require('fs');
 const uploadSingle = multer({
   dest: './',
   fileFilter: (req, file, cb) => {
-    console.log(file);
     if (file.mimetype.includes('image')) {
       return cb(null, true);
     } else {

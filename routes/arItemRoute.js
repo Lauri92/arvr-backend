@@ -30,8 +30,8 @@ router.route('/contentmanager').
     get(arItemController.getArItemsByContentManagerId);
 
 router.route('/pois/:aritemid').
-    post(multerUtils.uploadSingle.single('avatar'), multerUtils.injectFile,
-        validationUtils.postPoiValidations,
+    post(multerUtils.uploadSingle.single('avatar'),
+        multerUtils.injectFile, validationUtils.postPoiValidations,
         arItemController.postPointsOfInterest).
     delete(arItemController.deletePointOfInterest);
 
