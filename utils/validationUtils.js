@@ -44,11 +44,13 @@ const postImageValidations = [
 ];
 
 const postPoiValidations = [
-  body('name', 'Minimum length for description is 3 characters!').
+  body('name', 'Minimum length for name is 3 characters!').
       isLength({min: 3}),
   body('description',
       'Minumum length for poi description is 10 characters!').
       isLength({min: 10}),
+  body('category', 'Minimum length for category is 3 characters!').
+      isLength({min: 3}),
   body('x',
       'Must be a number!').
       isFloat(),

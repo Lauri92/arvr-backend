@@ -389,7 +389,7 @@ const deleteItem = async (req, res) => {
 
       // Remove the poi images
       for (const poi of poisToBeRemoved) {
-        if (poi.poiImage !== 'poiimages/poidefault') {
+        if (poi.poiImage !== 'poiimages/poidefault.jpg') {
           await poiImageContainer.deleteBlob(poi.poiImage.substring(10));
           //console.log(poi.poiImage.substring(10));
         }
@@ -419,6 +419,11 @@ const postPointsOfInterest = async (req, res) => {
     const objectToBeUpdated = await Schemas.arItem.findOne(
         {'_id': req.params.aritemid});
     if (!validationErrors.isEmpty()) {
+      if (req.file) {
+        await fs.unlink(req.file.filename, err => {
+          if (err) throw err;
+        });
+      }
       res.status(400).send(validationErrors.array());
     } else if (objectToBeUpdated.userId !== req.user.id) {
       res.status(400).send('Cheeky cheeky');
@@ -456,12 +461,13 @@ const postPointsOfInterest = async (req, res) => {
           res.status(400).send('Failed to upload 😥');
         }
       } else {
-        req.body.poiImage = `poiimages/poidefault`;
+        req.body.poiImage = `poiimages/poidefault.jpg`;
       }
       const poi = {
         poiId: id,
         name: req.body.name,
         description: req.body.description,
+        category: req.body.category,
         x: Number(req.body.x),
         y: Number(req.body.y),
         z: Number(req.body.z),
@@ -496,7 +502,7 @@ const deletePointOfInterest = async (req, res) => {
       const azureImageUrl = pois.filter((poi) => {
         return poi.poiId === req.query.id;
       });
-      if (azureImageUrl[0].poiImage !== 'poiimages/poidefault') {
+      if (azureImageUrl[0].poiImage !== 'poiimages/poidefault.jpg') {
         const blobToDelete = azureImageUrl[0].poiImage.substring(10).toString();
         const container = await blobServiceClient.getContainerClient(
             `poiimages`);
