@@ -364,44 +364,48 @@ const deleteItem = async (req, res) => {
   try {
     const filter = {'_id': req.params.aritemid};
     const itemToBeRemoved = await Schemas.arItem.findOne(filter);
-    const poisToBeRemoved = itemToBeRemoved.pois;
+    if (req.user.id === itemToBeRemoved.userId) {
+      const poisToBeRemoved = itemToBeRemoved.pois;
 
-    const itemId = itemToBeRemoved.objectReference.substring(8, 44);
-    const objectContainer = await blobServiceClient.getContainerClient(
-        `objects`);
-    const poiImageContainer = await blobServiceClient.getContainerClient(
-        `poiimages`);
-    let blobs = objectContainer.listBlobsFlat();
-    let blob = await blobs.next();
-    let objectFiles = [];
-    while (!blob.done) {
-      if (blob.value.name.includes(itemId)) {
-        objectFiles.push(blob.value.name);
+      const itemId = itemToBeRemoved.objectReference.substring(8, 44);
+      const objectContainer = await blobServiceClient.getContainerClient(
+          `objects`);
+      const poiImageContainer = await blobServiceClient.getContainerClient(
+          `poiimages`);
+      let blobs = objectContainer.listBlobsFlat();
+      let blob = await blobs.next();
+      let objectFiles = [];
+      while (!blob.done) {
+        if (blob.value.name.includes(itemId)) {
+          objectFiles.push(blob.value.name);
+        }
+        blob = await blobs.next();
       }
-      blob = await blobs.next();
-    }
 
-    // Remove the 3D files
-    for (const file of objectFiles) {
-      await objectContainer.deleteBlob(file);
-    }
-
-    // Remove the poi images
-    for (const poi of poisToBeRemoved) {
-      if (poi.poiImage !== 'poiimages/poidefault') {
-        await poiImageContainer.deleteBlob(poi.poiImage.substring(10));
-        //console.log(poi.poiImage.substring(10));
+      // Remove the 3D files
+      for (const file of objectFiles) {
+        await objectContainer.deleteBlob(file);
       }
-    }
 
-    Schemas.arItem.deleteOne(filter, function(err) {
-      if (err) {
-        console.log(err);
-        res.status(400).send('Failed to remove');
+      // Remove the poi images
+      for (const poi of poisToBeRemoved) {
+        if (poi.poiImage !== 'poiimages/poidefault') {
+          await poiImageContainer.deleteBlob(poi.poiImage.substring(10));
+          //console.log(poi.poiImage.substring(10));
+        }
       }
-    });
 
-    res.status(200).json({message: 'Removed item successfully'});
+      Schemas.arItem.deleteOne(filter, function(err) {
+        if (err) {
+          console.log(err);
+          res.status(400).send('Failed to remove');
+        }
+      });
+
+      res.status(200).json({message: 'Removed item successfully'});
+    } else {
+      res.status(400).send('Cheeky cheeky');
+    }
   } catch (e) {
     console.log(e.message);
     res.status(400).send(`Failed to remove item ${e.message}`);
@@ -485,10 +489,10 @@ const deletePointOfInterest = async (req, res) => {
     if (objectToBeUpdated.userId !== req.user.id) {
       res.status(400).send('Cheeky cheeky');
     } else {
-      const testertester = await Schemas.arItem.findOneAndUpdate(
+      const updatedItem = await Schemas.arItem.findOneAndUpdate(
           {_id: req.params.aritemid},
           {$pull: {pois: {poiId: req.query.id}}});
-      const pois = testertester.pois;
+      const pois = updatedItem.pois;
       const azureImageUrl = pois.filter((poi) => {
         return poi.poiId === req.query.id;
       });
