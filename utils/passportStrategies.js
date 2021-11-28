@@ -11,6 +11,7 @@ const bcrypt = require('bcryptjs');
 passport.use(new Strategy(
     async (username, password, done) => {
       try {
+        username = username.toLowerCase()
         // Search for user from database with given username
         const user = await Schemas.arUserModel.findOne(
             {username: `${username}`});

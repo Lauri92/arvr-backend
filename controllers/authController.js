@@ -18,7 +18,7 @@ const create_user = async (req, res) => {
         lowerCaseBodyUsername.slice(1);
 
     const checkDuplicate = await Schemas.arUserModel.findOne(
-        {username: `${bodyUsernameUppercase}`});
+        {username: `${lowerCaseBodyUsername}`});
 
     //console.log('\x1b[36m%s\x1b[0m', `${req.body.username.toLowerCase()}`);
 
@@ -39,13 +39,13 @@ const create_user = async (req, res) => {
           let user;
           if (req.body.contentManager) {
             user = {
-              username: bodyUsernameUppercase,
+              username: lowerCaseBodyUsername,
               password: req.body.password,
               contentManager: 1,
             };
           } else {
             user = {
-              username: bodyUsernameUppercase,
+              username: lowerCaseBodyUsername,
               password: req.body.password,
               contentManager: 0,
             };
