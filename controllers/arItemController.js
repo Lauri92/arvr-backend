@@ -426,6 +426,11 @@ const postPointsOfInterest = async (req, res) => {
       }
       res.status(400).send(validationErrors.array());
     } else if (objectToBeUpdated.userId !== req.user.id) {
+      if (req.file) {
+        await fs.unlink(req.file.filename, err => {
+          if (err) throw err;
+        });
+      }
       res.status(400).send('Cheeky cheeky');
     } else {
       const id = uuidv4();
@@ -438,11 +443,6 @@ const postPointsOfInterest = async (req, res) => {
           console.log(`Create container ${containerName} successfully`,
               createContainerResponse.succeeded);
           const filename = `${req.file.filename}`;
-          // const filetype = await FileType.fromFile(filename);
-          //const newName = `${filename}.${filetype.ext}`;
-          //await fs.rename(filename, newName, () => {
-          //console.log('renamed');
-          //});
           const blockBlobClient = await containerClient.getBlockBlobClient(
               filename);
           await blockBlobClient.uploadFile(filename);
@@ -483,6 +483,11 @@ const postPointsOfInterest = async (req, res) => {
     }
   } catch (e) {
     console.log(e.message);
+    if (req.file) {
+      await fs.unlink(req.file.filename, err => {
+        if (err) throw err;
+      });
+    }
     res.status(400).send('Failed to upload poi!');
   }
 };

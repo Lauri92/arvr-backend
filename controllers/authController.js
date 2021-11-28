@@ -11,7 +11,6 @@ const get_message = async (req, res) => {
 
 const create_user = async (req, res) => {
   try {
-    // Extract the validation errors from a request.
     const errors = validationResult(req);
     const lowerCaseBodyUsername = req.body.username.toLowerCase();
     const bodyUsernameUppercase = lowerCaseBodyUsername.charAt(0).
