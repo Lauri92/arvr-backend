@@ -468,6 +468,8 @@ const postPointsOfInterest = async (req, res) => {
         name: req.body.name,
         description: req.body.description,
         category: req.body.category,
+        latitude: Number(req.body.latitude),
+        longitude: Number(req.body.longitude),
         x: Number(req.body.x),
         y: Number(req.body.y),
         z: Number(req.body.z),

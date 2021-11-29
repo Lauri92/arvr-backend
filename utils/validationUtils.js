@@ -51,6 +51,12 @@ const postPoiValidations = [
       isLength({min: 10}),
   body('category', 'Minimum length for category is 3 characters!').
       isLength({min: 3}),
+  body('latitude',
+      'Check provided latitude value! (Should be between -90 and 90 😀)').
+      isFloat({min: -90, max: 90}),
+  body('longitude',
+      'Check provided longitude value! (Should be between -180 and 180 😀)').
+      isFloat({min: -180, max: 180}),
   body('x',
       'Must be a number!').
       isFloat(),
