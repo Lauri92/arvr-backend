@@ -82,10 +82,20 @@ const updateValidations = [
       isLength({min: 3}),
 ];
 
+const mapCoordinateUpdateValidations = [
+  body('x', 'Must be a number!').
+      isFloat(),
+  body('y', 'Must be a number!').
+      isFloat(),
+  body('z', 'Must be a number!').
+      isFloat(),
+];
+
 module.exports = {
   registerValidations,
   updateValidations,
   post3dValidations,
   postImageValidations,
   postPoiValidations,
+  mapCoordinateUpdateValidations
 };

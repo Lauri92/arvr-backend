@@ -36,6 +36,8 @@ router.route('/pois/:aritemid').
         arItemController.postPointsOfInterest).
     patch(validationUtils.updateValidations,
         arItemController.updatePointOfInterestBasicValues).
+    put(validationUtils.mapCoordinateUpdateValidations,
+        arItemController.updatePointOfInterestMapCoordinates).
     delete(arItemController.deletePointOfInterest);
 
 router.route('/update/:aritemid').

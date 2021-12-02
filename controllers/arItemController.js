@@ -559,6 +559,43 @@ const updatePointOfInterestBasicValues = async (req, res) => {
 
 };
 
+const updatePointOfInterestMapCoordinates = async (req, res) => {
+  try {
+    const validationErrors = await validationResult(req);
+    const objectToBeUpdated = await Schemas.arItem.findOne(
+        {'_id': req.params.aritemid});
+
+    if (req.user.id !== objectToBeUpdated.userId) {
+      res.status(400).send('Cheeky cheeky');
+    } else if (!validationErrors.isEmpty()) {
+      console.log('Errors in validation');
+      res.status(400).send(validationErrors);
+    } else {
+      const propertyValue = `pois.$.mapCoordinates.x`;
+      const propertyValue2 = `pois.$.mapCoordinates.y`;
+      const propertyValue3 = `pois.$.mapCoordinates.z`;
+
+      Schemas.arItem.findOneAndUpdate({
+        '_id': req.params.aritemid,
+        'pois.poiId': req.query.id,
+      }, {
+        '$set': {
+          [propertyValue]: req.body.x,
+          [propertyValue2]: req.body.y,
+          [propertyValue3]: req.body.z,
+        },
+      }, function(error, success) {
+        console.log('Updated');
+      });
+
+      res.status(200).send({message: 'yes we made it!'});
+    }
+  } catch (e) {
+    console.log(e.message);
+    res.status(400).send('Failed to update map coordinates');
+  }
+};
+
 const deletePointOfInterest = async (req, res) => {
 
   try {
@@ -601,4 +638,5 @@ module.exports = {
   postPointsOfInterest,
   updatePointOfInterestBasicValues,
   deletePointOfInterest,
+  updatePointOfInterestMapCoordinates,
 };
