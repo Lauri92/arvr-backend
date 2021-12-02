@@ -470,9 +470,11 @@ const postPointsOfInterest = async (req, res) => {
         category: req.body.category,
         latitude: Number(req.body.latitude),
         longitude: Number(req.body.longitude),
-        x: Number(req.body.x),
-        y: Number(req.body.y),
-        z: Number(req.body.z),
+        mapCoordinates: {
+          x: Number(req.body.x),
+          y: Number(req.body.y),
+          z: Number(req.body.z),
+        },
         poiImage: req.body.poiImage,
       };
       const filter = {'_id': req.params.aritemid};
@@ -492,6 +494,69 @@ const postPointsOfInterest = async (req, res) => {
     }
     res.status(400).send('Failed to upload poi!');
   }
+};
+
+const updatePointOfInterestBasicValues = async (req, res) => {
+  console.log(req.query.param);
+  console.log(req.params.aritemid);
+
+  const allowedParams = [
+    'description',
+    'latitude',
+    'longitude',
+    'name',
+    'category',
+  ];
+
+  if (allowedParams.includes(req.query.param)) {
+    try {
+      const validationErrors = await validationResult(req);
+
+      const fieldErrors = validationErrors.errors.filter((errorParam) => {
+        return req.query.param === errorParam.param;
+      });
+
+      const objectToBeUpdated = await Schemas.arItem.findOne(
+          {'_id': req.params.aritemid});
+
+      if (fieldErrors[0]) {
+        res.status(400).send(fieldErrors[0].msg);
+      } else if (objectToBeUpdated.userId !== req.user.id) {
+        res.status(400).send('Cheeky cheeky 🤨');
+      } else {
+        let bodyValue;
+        const getBodyValue = {
+          'description': () => bodyValue = req.body.description,
+          'latitude': () => bodyValue = req.body.latitude,
+          'longitude': () => bodyValue = req.body.longitude,
+          'category': () => bodyValue = req.body.category,
+          'name': () => bodyValue = req.body.name,
+          'default': () => res.status(400).send('Failed to insert'),
+        };
+
+        await (getBodyValue[req.query.param] || getBodyValue['default'])();
+
+        const propertyValue = `pois.$.${req.query.param}`;
+
+        Schemas.arItem.findOneAndUpdate({
+          '_id': req.params.aritemid,
+          'pois.poiId': req.query.id,
+        }, {
+          '$set': {[propertyValue]: bodyValue},
+        }, function(error, success) {
+          console.log('Updated');
+        });
+
+        res.status(200).json({message: `Updated ${req.query.param}`});
+      }
+    } catch (e) {
+      console.log(e.message);
+      res.status(400).send('Failed to update');
+    }
+  } else {
+    res.status(400).send('Failed to update, check param');
+  }
+
 };
 
 const deletePointOfInterest = async (req, res) => {
@@ -534,5 +599,6 @@ module.exports = {
   updateItem,
   deleteItem,
   postPointsOfInterest,
+  updatePointOfInterestBasicValues,
   deletePointOfInterest,
 };

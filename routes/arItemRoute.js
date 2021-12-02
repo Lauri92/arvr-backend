@@ -34,6 +34,8 @@ router.route('/pois/:aritemid').
     post(multerUtils.uploadSingle.single('avatar'),
         multerUtils.injectFile, validationUtils.postPoiValidations,
         arItemController.postPointsOfInterest).
+    patch(validationUtils.updateValidations,
+        arItemController.updatePointOfInterestBasicValues).
     delete(arItemController.deletePointOfInterest);
 
 router.route('/update/:aritemid').
