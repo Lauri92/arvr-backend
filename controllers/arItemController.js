@@ -254,8 +254,8 @@ const insertItemToDb = async (req, res) => {
     logoImageReference: req.body.logoImageReference,
     name: req.body.name,
     description: req.body.description,
-    latitude: req.body.latitude,
-    longitude: req.body.longitude,
+    latitude: Number(req.body.latitude),
+    longitude: Number(req.body.longitude),
     category: req.body.category,
     QRCode: '123',
   };
@@ -336,8 +336,8 @@ const updateItem = async (req, res) => {
         let bodyValue;
         const getBodyValue = {
           'description': () => bodyValue = req.body.description,
-          'latitude': () => bodyValue = req.body.latitude,
-          'longitude': () => bodyValue = req.body.longitude,
+          'latitude': () => bodyValue = Number(req.body.latitude),
+          'longitude': () => bodyValue = Number(req.body.longitude),
           'category': () => bodyValue = req.body.category,
           'name': () => bodyValue = req.body.name,
           'default': () => res.status(400).send('Failed to insert'),
@@ -527,8 +527,8 @@ const updatePointOfInterestBasicValues = async (req, res) => {
         let bodyValue;
         const getBodyValue = {
           'description': () => bodyValue = req.body.description,
-          'latitude': () => bodyValue = req.body.latitude,
-          'longitude': () => bodyValue = req.body.longitude,
+          'latitude': () => bodyValue = Number(req.body.latitude),
+          'longitude': () => bodyValue = Number(req.body.longitude),
           'category': () => bodyValue = req.body.category,
           'name': () => bodyValue = req.body.name,
           'default': () => res.status(400).send('Failed to insert'),
@@ -580,9 +580,9 @@ const updatePointOfInterestMapCoordinates = async (req, res) => {
         'pois.poiId': req.query.id,
       }, {
         '$set': {
-          [propertyValue]: req.body.x,
-          [propertyValue2]: req.body.y,
-          [propertyValue3]: req.body.z,
+          [propertyValue]: Number(req.body.x),
+          [propertyValue2]: Number(req.body.y),
+          [propertyValue3]: Number(req.body.z),
         },
       }, function(error, success) {
         console.log('Updated');
