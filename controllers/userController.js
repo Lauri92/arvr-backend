@@ -16,7 +16,8 @@ const getScannedItemsByUserId = async (req, res) => {
 
     const scannedItems = await Schemas.arItem.find({
       '_id': {$in: validIds},
-    });
+    }, '-pois');
+    console.log(scannedItems);
     res.status(200).json(scannedItems);
   } catch (e) {
     console.log(e.message);
