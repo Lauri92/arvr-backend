@@ -1,5 +1,5 @@
 'use strict';
-const {body, check} = require('express-validator');
+const {body} = require('express-validator');
 
 const registerValidations = [
   body('username', 'Minimum length 3 characters!').
