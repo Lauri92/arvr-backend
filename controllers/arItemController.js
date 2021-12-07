@@ -14,65 +14,6 @@ const getSecuredItem = async (req, res) => {
   res.status(200).send({message: 'Get secured item'});
 };
 
-const handleNoContentManager = async (req, res) => {
-  try {
-    await fs.unlink(req.file.filename, err => {
-      if (err) throw err;
-    });
-    res.status(400).send('You are not allowed to post items!😑');
-  } catch (e) {
-    console.log(e.message);
-    res.status(400).send('You are not allowed to post items!😑');
-  }
-};
-
-const handleErrorsInValidation = async (req, res, validationErrors) => {
-  const mappedErrors = validationErrors.errors.map((error) => {
-    return `${error.param} error: ${error.msg}`;
-  });
-  try {
-    if (req.body.type) {
-      await fs.unlink(req.file.filename, err => {
-        if (err) throw err;
-      });
-    }
-    res.status(400).send(mappedErrors);
-  } catch (e) {
-    console.log(e.message);
-    res.status(400).send(mappedErrors);
-  }
-};
-
-const insertImageToAzure = async (req, res, next) => {
-  try {
-    const containerName = 'images';
-    const containerClient = blobServiceClient.getContainerClient(
-        containerName);
-    const createContainerResponse = await containerClient.createIfNotExists();
-    console.log(`Create container ${containerName} successfully`,
-        createContainerResponse.succeeded);
-    // Upload the file
-    const filename = `${req.file.filename}`;
-    const filetype = await FileType.fromFile(filename);
-    const newName = `${filename}.${filetype.ext}`;
-    await fs.rename(filename, newName, () => {
-      console.log('renamed');
-    });
-
-    const blockBlobClient = containerClient.getBlockBlobClient(
-        newName);
-    await blockBlobClient.uploadFile(newName);
-    await fs.unlink(newName, err => {
-      if (err) throw err;
-    });
-    req.body.objectReference = `images/${newName}`;
-    next();
-  } catch (e) {
-    console.log(e);
-    res.status(400).send('Failed to upload 😥');
-  }
-};
-
 const insert3dObjectToAzure = async (req, res, next, dir) => {
 
   try {
@@ -128,17 +69,6 @@ const insert3dObjectToAzure = async (req, res, next, dir) => {
     res.status(400).send('Failed to upload 😥');
   }
 
-};
-
-const validateItemInfoAndUploadToAzure = async (req, res, next) => {
-  const validationErrors = await validationResult(req);
-  if (!req.user.contentManager) {
-    await handleNoContentManager(req, res);
-  } else if (!validationErrors.isEmpty()) {
-    await handleErrorsInValidation(req, res, validationErrors);
-  } else {
-    await insertImageToAzure(req, res, next);
-  }
 };
 
 const unlink3dItems = async (req) => {
@@ -628,7 +558,6 @@ const deletePointOfInterest = async (req, res) => {
 
 module.exports = {
   getSecuredItem,
-  validateItemInfoAndUploadToAzure,
   validate3dItemInfoAndUploadToAzure,
   insertItemToDb,
   getSingleArItemById,

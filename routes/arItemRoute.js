@@ -7,12 +7,6 @@ const multerUtils = require('../utils/multerUtils');
 const validationUtils = require('../utils/validationUtils');
 
 router.route('/').get(arItemController.getSecuredItem);
-/*.
-    post(multerUtils.uploadSingle.single('avatar'), multerUtils.injectFile,
-        validationUtils.postImageValidations,
-        arItemController.validateItemInfoAndUploadToAzure,
-        arItemController.insertItemToDb);
- */
 
 const cpUpload = multerUtils.upload3d.fields([
   {name: 'gltf', maxCount: 1},
