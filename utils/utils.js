@@ -2,9 +2,14 @@ const mongoose = require('mongoose');
 const checkEnvironment = (app) => {
   process.env.NODE_ENV = process.env.NODE_ENV || 'development';
   if (process.env.NODE_ENV === 'production') {
-    require('../production')(app, process.env.PORT);
+    if (!process.env.PORT) {
+      app.listen(3000);
+      console.log('App started on remote server (centOs)');
+    } else {
+      const PORT = process.env.PORT;
+      app.listen(PORT, () => console.log(`listening on ${PORT} (azure)`));
+    }
   } else {
-    //require('./localhost')(app, process.env.HTTPS_PORT, process.env.HTTP_PORT);
     app.listen(8000);
     const d = new Date(); // for now
     console.log(
