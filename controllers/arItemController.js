@@ -515,10 +515,12 @@ const updatePointOfInterestMapCoordinates = async (req, res) => {
           [propertyValue3]: Number(req.body.z),
         },
       }, function(error, success) {
-        console.log('Updated');
+        console.log(`Updated`);
       });
 
-      res.status(200).send({message: 'yes we made it!'});
+      res.status(200).
+          send(
+              {message: `Updated map coordinates x: ${req.body.x} y: ${req.body.y} z: ${req.body.z}`});
     }
   } catch (e) {
     console.log(e.message);
