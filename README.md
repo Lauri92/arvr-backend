@@ -65,7 +65,7 @@ logging in users and doing the authentication required to make the requests.
 
 ### Authentication route
 
-* Register users:
+#### Register users
 * URL:
     * ``auth/register``
 * Method
@@ -81,7 +81,7 @@ logging in users and doing the authentication required to make the requests.
     * json detailing if the registration was succesful
       <br></br>
 
-* Login users
+#### Login users
 * URL:
     * ``auth/login``
 * Method
