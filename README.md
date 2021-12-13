@@ -35,7 +35,7 @@ logging in users and doing the authentication required to make the requests.
     * ```touch .env```
     * ``` mkdir uploads```
 * Environment variables required to run the application on localhost
-    * ```MONGOCONNECTION```
+    * ```MONGOOSECONN```
         * This is the mongoDB connection string that is required in order to connect to database.
         * For localhost typically something like: ```mongodb://127.0.0.1:27017/<your-db-name>```
     * ```JWT```
@@ -51,15 +51,14 @@ logging in users and doing the authentication required to make the requests.
 
 
 * The source code has a piece of code checking where the application is launched. *(utils/utils.js)*
-    * If the application is to be launched somewhere else than localhost following environment variable rules apply:
+    * If the application is to be launched somewhere else than localhost following environment variable rules apply in
+      addition to previously mentioned:
     * ```NODE_ENV```
-        * To launch on Azure set this value to ```production```
+        * To launch on CentOS or Azure set this value to ```production```
     * Test development platform used in development of this app was setup in a CentOS server
-        * Define a ```PORT``` variable to be used in addition to the ```NODE_ENV``` variable, this is the port where the
-          application is listening to requests *(Typically set to be 3000, 5000, 8000 or 8080 but the nunber doesn't
-          really matter)*
+        * The app will launch on centOS if there is no PORT ENV defined
     * *NOTE: Azure doesn't require PORT to be defined as it is automatically done if the app is launched on that
-      platform*
+      platform therefore not defining a PORT will start the app on test server.*
 
 ## API endpoints
 
@@ -93,7 +92,8 @@ logging in users and doing the authentication required to make the requests.
         * Query
             * None
 * Response:
-    * json detailing if the login was succesful
+    * If succesful, response will contain a token which should be stored somewhere depending on platform, shared prefs,
+      cookies, local or session storage...
 
 ## All endpoints below require a bearer token (JWT) to be sent in the "Authorization" header. Token contains the information about the user who is doing the request.
 

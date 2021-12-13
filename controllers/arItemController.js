@@ -10,10 +10,12 @@ const QRCode = require('qrcode');
 const {v4: uuidv4} = require('uuid');
 const Schemas = require('../mongodb/schemas');
 
+// For testing token validity
 const getSecuredItem = async (req, res) => {
   res.status(200).send({message: 'Get secured item'});
 };
 
+// Upload item to Azure Storage
 const insert3dObjectToAzure = async (req, res, next, dir) => {
 
   try {
@@ -71,6 +73,7 @@ const insert3dObjectToAzure = async (req, res, next, dir) => {
 
 };
 
+// Remove files from the server
 const unlink3dItems = async (req) => {
   if (req.files['gltf']) {
     await fs.unlink(`./uploads/${req.files['gltf'][0].filename}`,
@@ -100,6 +103,7 @@ const unlink3dItems = async (req) => {
   }
 };
 
+// Rename and move items to uuid directory, the directory name will be part of the path in storage container
 const rename3dItemsToOriginalNameAndMoveToNewDirectory = async (req, res) => {
   try {
     const dir = uuidv4();
@@ -142,6 +146,7 @@ const rename3dItemsToOriginalNameAndMoveToNewDirectory = async (req, res) => {
   }
 };
 
+// Check validation errors for 3D objects
 const validate3dItemInfoAndUploadToAzure = async (req, res, next) => {
   const validationErrors = await validationResult(req);
   if (!req.user.contentManager) {
@@ -176,6 +181,7 @@ const validate3dItemInfoAndUploadToAzure = async (req, res, next) => {
   }
 };
 
+// Insert information to mongoDB, name, category, reference in storage...
 const insertItemToDb = async (req, res) => {
   const arItem = {
     userId: req.user.id,
@@ -214,6 +220,7 @@ const insertItemToDb = async (req, res) => {
   }
 };
 
+// Returns a single 3D item
 const getSingleArItemById = async (req, res) => {
   try {
     const doc = await Schemas.arItem.findById(req.params.id);
@@ -224,6 +231,7 @@ const getSingleArItemById = async (req, res) => {
   }
 };
 
+// Returns 3D items posted by a content manager (user which has the right to post items)
 const getArItemsByContentManagerId = async (req, res) => {
   try {
     const doc = await Schemas.arItem.
@@ -237,6 +245,7 @@ const getArItemsByContentManagerId = async (req, res) => {
   }
 };
 
+// Update basic values of 3D item
 const updateItem = async (req, res) => {
 
   const allowedParams = [
@@ -289,6 +298,7 @@ const updateItem = async (req, res) => {
   }
 };
 
+// Delete 3D item
 const deleteItem = async (req, res) => {
 
   try {
@@ -342,6 +352,7 @@ const deleteItem = async (req, res) => {
   }
 };
 
+// Post a point of interest for 3D object
 const postPointsOfInterest = async (req, res) => {
 
   try {
@@ -426,6 +437,7 @@ const postPointsOfInterest = async (req, res) => {
   }
 };
 
+// Update point of interest basic values
 const updatePointOfInterestBasicValues = async (req, res) => {
   console.log(req.query.param);
   console.log(req.params.aritemid);
@@ -489,6 +501,7 @@ const updatePointOfInterestBasicValues = async (req, res) => {
 
 };
 
+// Update mapcoordinates of a point of interest
 const updatePointOfInterestMapCoordinates = async (req, res) => {
   try {
     const validationErrors = await validationResult(req);
@@ -528,6 +541,7 @@ const updatePointOfInterestMapCoordinates = async (req, res) => {
   }
 };
 
+// Delete point of interest
 const deletePointOfInterest = async (req, res) => {
 
   try {
