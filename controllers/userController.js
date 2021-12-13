@@ -2,6 +2,7 @@
 const Schemas = require('../mongodb/schemas');
 const mongoose = require('mongoose');
 
+// Retrieves the 3D objects user has scanned
 const getScannedItemsByUserId = async (req, res) => {
   try {
     let validIds;
@@ -25,6 +26,7 @@ const getScannedItemsByUserId = async (req, res) => {
   }
 };
 
+// Add a scanned 3D object id for user
 const postScannedItemForUser = async (req, res) => {
   const insertValidation = mongoose.isValidObjectId(req.params.scanneditemid);
 
@@ -54,6 +56,7 @@ const postScannedItemForUser = async (req, res) => {
   }
 };
 
+// Remove scanned 3D item id from user
 const deleteScannedItemForUser = async (req, res) => {
 
   try {

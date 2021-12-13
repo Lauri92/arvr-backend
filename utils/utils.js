@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const checkEnvironment = (app) => {
+  // No NODE_ENV -> start in localhost,
+  // no PORT ENV -> start in CentOS for testing environment,
+  // PORT is defined -> Start in Azure
   process.env.NODE_ENV = process.env.NODE_ENV || 'development';
   if (process.env.NODE_ENV === 'production') {
     if (!process.env.PORT) {

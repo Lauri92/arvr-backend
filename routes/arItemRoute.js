@@ -1,7 +1,6 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const {body} = require('express-validator');
 const arItemController = require('../controllers/arItemController');
 const multerUtils = require('../utils/multerUtils');
 const validationUtils = require('../utils/validationUtils');

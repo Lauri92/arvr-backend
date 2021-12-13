@@ -10,6 +10,7 @@ const userRoute = require('./routes/userRoute');
 const utils = require('./utils/utils');
 
 const app = express();
+// Add middlewares to the app router
 app.use(passport.initialize({}));
 app.use(cors());
 app.use(express.json());

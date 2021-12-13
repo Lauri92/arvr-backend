@@ -9,6 +9,7 @@ const get_message = async (req, res) => {
   res.status(200).send({message: 'Testing get route'});
 };
 
+// Insert new user to DB
 const create_user = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -73,6 +74,7 @@ const create_user = async (req, res) => {
 
 };
 
+// Login a user
 const login = (req, res) => {
   passport.authenticate('local', {session: false}, (err, user, info) => {
     console.log('authcontroller user:', user);
@@ -96,6 +98,7 @@ const login = (req, res) => {
   })(req, res);
 };
 
+// no real functionality
 const logout = (req, res) => {
   req.logout();
   res.send('You have logged out');

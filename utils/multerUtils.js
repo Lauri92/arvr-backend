@@ -1,6 +1,7 @@
 const multer = require('multer');
 const fs = require('fs');
 
+// Check that uploaded file is an image
 const uploadSingle = multer({
   dest: './',
   fileFilter: (req, file, cb) => {
@@ -14,6 +15,8 @@ const uploadSingle = multer({
     next(err);
   },
 });
+
+// Check the filetypes of uploaded 3D items, gltf, bin and images are accepted
 const upload3d = multer({
   dest: './uploads',
   fileFilter: (req, file, cb) => {
@@ -53,6 +56,7 @@ const upload3d = multer({
   },
 });
 
+// Set a value for the body's file property if the filefilter for image passed
 const injectFile = (req, res, next) => {
   if (req.file) {
     req.body.type = req.file.mimetype;
@@ -60,6 +64,7 @@ const injectFile = (req, res, next) => {
   next();
 };
 
+// Set a value for the body's file property if filefilter for 3D object passed
 const inject3dFileTypes = async (req, res, next) => {
 
   const matchingFiles = await checkGltfRequirements(req);
@@ -73,6 +78,7 @@ const inject3dFileTypes = async (req, res, next) => {
   next();
 };
 
+// Check that uploaded files match the requirements in the gltf file json
 const checkGltfRequirements = async (req) => {
   try {
     if (`uploads/${req.files['gltf'][0].filename}`) {
