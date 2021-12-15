@@ -1,6 +1,6 @@
 # ARea Explorer API
 
-This is the REST API used in [Web frontend](https://github.com/arnaud18o5/AR_VR_Map_WebSite)
+This is the REST API used in [Web frontend](https://github.com/arnaud18o5/AReaExplorerFront)
 and [Android mobile app](https://github.com/TuomasB73/AR_VR_Map_App) for application called ARea Explorer, more details
 about the application itself and it's purposes will be found from the links, please take a look at them to get a better
 context about what this application is about as a whole. This README will only cover the topics relevant to the backend
